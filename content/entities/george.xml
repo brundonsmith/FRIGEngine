@@ -1,0 +1,41 @@
+<entity name="Bob" >
+	<spacial x="10" y="10"/>
+	<drawable default_animation="stand_s">
+		<animation id="stand_nw" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_n" sprite="content/entities/player_1_idle_n.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_ne" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_sw" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_s" sprite="content/entities/player_1_idle_s.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_se" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_e" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_w" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		
+		<animation id="walk_nw" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_n" sprite="content/entities/player_1_move_n.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_ne" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_sw" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_s" sprite="content/entities/player_1_move_s.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_se" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_e" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_w" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+	</drawable>
+	<character>
+		<animation_idle_nw id="stand_nw"/>
+		<animation_idle_n id="stand_n"/>
+		<animation_idle_ne id="stand_ne"/>
+		<animation_idle_sw id="stand_sw"/>
+		<animation_idle_s id="stand_s"/>
+		<animation_idle_se id="stand_se"/>
+		<animation_idle_e id="stand_e"/>
+		<animation_idle_w id="stand_w"/>
+		
+		<animation_idle_nw id="walk_nw"/>
+		<animation_idle_n id="walk_n"/>
+		<animation_idle_ne id="walk_ne"/>
+		<animation_idle_sw id="walk_sw"/>
+		<animation_idle_s id="walk_s"/>
+		<animation_idle_se id="walk_se"/>
+		<animation_idle_e id="walk_e"/>
+		<animation_idle_w id="walk_w"/>
+	</character>
+</entity>
