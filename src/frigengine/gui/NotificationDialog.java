@@ -1,5 +1,11 @@
 package frigengine.gui;
 
+import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
+
+import frigengine.FRIGGame;
+
 public class NotificationDialog extends GUIFrame {
 	// Attributes
 	private static Texture2D background;
@@ -9,10 +15,15 @@ public class NotificationDialog extends GUIFrame {
 	public NotificationDialog(String content) {
 		Blocking = true;
 		Pausing = true;
-		presence = new ShapeRectangle(FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Width / 2
-				- FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Width / 8,
-				FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Height / 2
-						- FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Height / 8,
+		presence = new ShapeRectangle(
+				FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Width
+						/ 2
+						- FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Width
+						/ 8,
+				FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Height
+						/ 2
+						- FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Height
+						/ 8,
 				FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Width / 4,
 				FRIGGame.Instance.GraphicsDevice.Viewport.Bounds.Height / 4);
 
@@ -21,8 +32,9 @@ public class NotificationDialog extends GUIFrame {
 
 	public/* override */void loadContent() {
 		if (background == null)
-			background = Texture2D.FromStream(FRIGGame.Instance.GraphicsDevice, new FileStream(
-					"content\\gui\\NotificationDialog.png", FileMode.Open));
+			background = Texture2D.FromStream(FRIGGame.Instance.GraphicsDevice,
+					new FileStream("content\\gui\\NotificationDialog.png",
+							FileMode.Open));
 	}
 
 	// Main loop methods
@@ -38,13 +50,28 @@ public class NotificationDialog extends GUIFrame {
 		 * (Keyboard.GetState().GetPressedKeys().Contains(Keys.D)) area.Width++;
 		 */
 
-		if (this.getCurrentKeyboardState().GetPressedKeys().Contains(Keys.Enter))
+		if (this.getCurrentKeyboardState().GetPressedKeys()
+				.Contains(Keys.Enter))
 			close();
 	}
 
 	public/* override */void draw() {
-		FRIGGame.Instance.getSpriteBatch().Draw(background, presence.getRectangle(), Color.White);
-		FRIGGame.Instance.getSpriteBatch().DrawTextBox(FRIGGame.Instance.getGameFont(), content,
+		FRIGGame.Instance.getSpriteBatch().Draw(background,
+				presence.getRectangle(), Color.White);
+		FRIGGame.Instance.getSpriteBatch().DrawTextBox(
+				FRIGGame.Instance.getGameFont(), content,
 				getborderedArea().Clone(), Color.White);
+	}
+
+	@Override
+	public void update(GameContainer container, int delta, Input input) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void render(GameContainer container, Graphics g) {
+		// TODO Auto-generated method stub
+
 	}
 }

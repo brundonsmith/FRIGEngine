@@ -13,6 +13,7 @@ public class ComponentCharacter extends EntityComponent {
 	public static String getComponentID() {
 		return "character";
 	}
+
 	public String getTagName() {
 		return getComponentID();
 	}
@@ -20,6 +21,7 @@ public class ComponentCharacter extends EntityComponent {
 	public static String[] getComponentDependencies() {
 		return new String[] { "spacial", "drawable" };
 	}
+
 	public static String[] getComponentExclusives() {
 		return new String[] {};
 	}
@@ -57,13 +59,15 @@ public class ComponentCharacter extends EntityComponent {
 		super(entity);
 		this.id = getComponentID();
 	}
+
 	@Override
 	public void init(XMLElement xmlElement) {
 		if (!xmlElement.getName().equals(this.getID()))
-			throw new DataParseException("Xml node does not match component type '" + this.id + "'");
+			throw new DataParseException(
+					"Xml node does not match component type '" + this.id + "'");
 
 		// Assign attributes
-		moveVector = new Vector2f(0,0);
+		moveVector = new Vector2f(0, 0);
 		try {
 			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("speed", 0));
 		} catch (SlickXMLException e) {
@@ -71,61 +75,70 @@ public class ComponentCharacter extends EntityComponent {
 					xmlElement.getAttribute("speed"));
 		}
 		try {
-			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("direction", 0));
+			this.setMoveSpeed((float) xmlElement.getDoubleAttribute(
+					"direction", 0));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(this.getTagName(), "direction",
 					xmlElement.getAttribute("direction"));
 		}
 
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_nw").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_nw").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_n").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_n").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_ne").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_ne").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_sw").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_sw").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_s").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_s").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_se").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_se").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_e").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_e").get(0).getAttribute("id", "")
-				: null;
-		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_w").size() > 0 ? xmlElement
-				.getChildrenByName("animation_idle_w").get(0).getAttribute("id", "")
-				: null;
+		this.animationIdleNW = xmlElement
+				.getChildrenByName("animation_idle_nw").size() > 0 ? xmlElement
+				.getChildrenByName("animation_idle_nw").get(0)
+				.getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_n")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_idle_n")
+				.get(0).getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement
+				.getChildrenByName("animation_idle_ne").size() > 0 ? xmlElement
+				.getChildrenByName("animation_idle_ne").get(0)
+				.getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement
+				.getChildrenByName("animation_idle_sw").size() > 0 ? xmlElement
+				.getChildrenByName("animation_idle_sw").get(0)
+				.getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_s")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_idle_s")
+				.get(0).getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement
+				.getChildrenByName("animation_idle_se").size() > 0 ? xmlElement
+				.getChildrenByName("animation_idle_se").get(0)
+				.getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_e")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_idle_e")
+				.get(0).getAttribute("id", "") : null;
+		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_w")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_idle_w")
+				.get(0).getAttribute("id", "") : null;
 
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_nw").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_nw").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_n").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_n").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_ne").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_ne").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_sw").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_sw").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_s").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_s").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_se").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_se").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_e").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_e").get(0).getAttribute("id", "")
-				: null;
-		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_w").size() > 0 ? xmlElement
-				.getChildrenByName("animation_move_w").get(0).getAttribute("id", "")
-				: null;
+		this.animationMoveNW = xmlElement
+				.getChildrenByName("animation_move_nw").size() > 0 ? xmlElement
+				.getChildrenByName("animation_move_nw").get(0)
+				.getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_n")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_move_n")
+				.get(0).getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement
+				.getChildrenByName("animation_move_ne").size() > 0 ? xmlElement
+				.getChildrenByName("animation_move_ne").get(0)
+				.getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement
+				.getChildrenByName("animation_move_sw").size() > 0 ? xmlElement
+				.getChildrenByName("animation_move_sw").get(0)
+				.getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_s")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_move_s")
+				.get(0).getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement
+				.getChildrenByName("animation_move_se").size() > 0 ? xmlElement
+				.getChildrenByName("animation_move_se").get(0)
+				.getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_e")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_move_e")
+				.get(0).getAttribute("id", "") : null;
+		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_w")
+				.size() > 0 ? xmlElement.getChildrenByName("animation_move_w")
+				.get(0).getAttribute("id", "") : null;
 
 	}
 
@@ -135,8 +148,8 @@ public class ComponentCharacter extends EntityComponent {
 		((ComponentDrawable) entity.getComponent("drawable"))
 				.setContinuousAnimation(getCurrentAnimation());
 		if (isMoving())
-			((ComponentSpacial) entity.getComponent("spacial")).moveBy(moveVector.copy().scale(
-					delta));
+			((ComponentSpacial) entity.getComponent("spacial"))
+					.moveBy(moveVector.copy().scale(delta));
 		moveVector = new Vector2f();
 	}
 
@@ -144,21 +157,27 @@ public class ComponentCharacter extends EntityComponent {
 	public void setMoveVector(Vector2f moveVector) {
 		this.moveVector = moveVector;
 	}
+
 	public void setMoveSpeed(float moveSpeed) {
 		this.moveSpeed = moveSpeed;
 	}
+
 	public float getMoveSpeed() {
 		return this.moveSpeed;
 	}
+
 	public void setDirection(double direction) {
 		this.moveVector.setTheta(direction);
 	}
+
 	public double getDirection() {
 		return this.direction;
 	}
+
 	public boolean isMoving() {
 		return moveVector.length() > STANDING_STILL;
 	}
+
 	private String getCurrentAnimation() {
 		if (337.5 <= moveVector.getTheta() || moveVector.getTheta() < 22.5)
 			return isMoving() ? animationMoveE : animationIdleE;
@@ -187,6 +206,7 @@ public class ComponentCharacter extends EntityComponent {
 		this.moveVector.set(this.moveSpeed, 0);
 		this.moveVector.setTheta(this.direction);
 	}
+
 	public void move(int direction, float moveSpeed) {
 		this.direction = direction;
 		this.moveSpeed = moveSpeed;

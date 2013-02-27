@@ -48,6 +48,7 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 	public void update(GameContainer container, int delta, Scene scene) {
 		animation.update(delta);
 	}
+
 	public void render(GameContainer container, Graphics g, Scene scene) {
 		scene.renderLayer(container, g, this.animation, this.depth);
 	}

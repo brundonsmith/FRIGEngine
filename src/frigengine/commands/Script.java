@@ -28,8 +28,9 @@ public class Script extends IDable {
 	}
 
 	private CommandInstance parseCommand(String line) {
-		return new CommandInstance(line.split("(")[0], line.split("(")[1].split(")")[0]
-				.replace(" ", "").replace("\t", "").split(","));
+		return new CommandInstance(line.split("(")[0],
+				line.split("(")[1].split(")")[0].replace(" ", "")
+						.replace("\t", "").split(","));
 	}
 
 	// Other methods

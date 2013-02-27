@@ -2,7 +2,8 @@ package frigengine.util;
 
 import java.util.Iterator;
 
-public abstract class Composable<E extends Component> extends IDable implements Iterable<E> {
+public abstract class Composable<E extends Component> extends IDable implements
+		Iterable<E> {
 	// Attributes
 	private IDableCollection<E> components = new IDableCollection<E>();
 

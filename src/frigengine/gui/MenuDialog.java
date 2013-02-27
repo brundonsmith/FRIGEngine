@@ -1,5 +1,14 @@
 package frigengine.gui;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
+
+import frigengine.FRIGGame;
+
 public class MenuDialog extends GUIFrame {
 	// Attributes
 	private static Texture2D background;
@@ -17,13 +26,17 @@ public class MenuDialog extends GUIFrame {
 	public MenuDialog(int columns, int rows, MenuItem[] items) {
 		this.columns = columns;
 		this.rows = rows;
-		this.items = new ArrayList<MenuItem>(items);
+		this.items = new ArrayList<MenuItem>();
+		for (MenuItem item : items) {
+			this.items.add(item);
+		}
 	}
 
-	public/* override */void loadContent() {
+	public void loadContent() {
 		if (background == null)
-			background = Texture2D.FromStream(FRIGGame.Instance.GraphicsDevice, new FileStream(
-					"content\\gui\\NotificationDialog.png", FileMode.Open));
+			background = Texture2D.FromStream(FRIGGame.Instance.GraphicsDevice,
+					new FileStream("content\\gui\\NotificationDialog.png",
+							FileMode.Open));
 	}
 
 	// Main loop methods
@@ -33,5 +46,17 @@ public class MenuDialog extends GUIFrame {
 	}
 
 	public/* override */void draw() {
+	}
+
+	@Override
+	public void update(GameContainer container, int delta, Input input) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void render(GameContainer container, Graphics g) {
+		// TODO Auto-generated method stub
+
 	}
 }

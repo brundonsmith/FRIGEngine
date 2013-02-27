@@ -2,7 +2,6 @@ package frigengine.entities;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.xml.XMLElement;
 
 import frigengine.Initializable;
@@ -12,7 +11,8 @@ import frigengine.exceptions.InvalidTagException;
 import frigengine.scene.*;
 import frigengine.util.*;
 
-public class Entity extends Composable<EntityComponent> implements Initializable {
+public class Entity extends Composable<EntityComponent> implements
+		Initializable {
 	@Override
 	public String getTagName() {
 		return "entity";
@@ -25,6 +25,7 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 	public Entity(String id) {
 		this.id = id;
 	}
+
 	public void init(XMLElement xmlElement) {
 		if (!xmlElement.getName().equals(getTagName()))
 			throw new InvalidTagException(getTagName(), xmlElement.getName());
@@ -38,33 +39,36 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 			XMLElement componentElement = xmlElement.getChildren().get(i);
 
 			EntityComponent newEntityComponent;
-			if(componentElement.getName().equals(ComponentSpacial.getComponentID())) {
+			if (componentElement.getName().equals(
+					ComponentSpacial.getComponentID())) {
 				newEntityComponent = new ComponentSpacial(this);
-				((ComponentSpacial)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentDrawable.getComponentID())) {
+				((ComponentSpacial) newEntityComponent).init(componentElement);
+			} else if (componentElement.getName().equals(
+					ComponentDrawable.getComponentID())) {
 				newEntityComponent = new ComponentDrawable(this);
-				((ComponentDrawable)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentPhysical.getComponentID())) {
+				((ComponentDrawable) newEntityComponent).init(componentElement);
+			} else if (componentElement.getName().equals(
+					ComponentPhysical.getComponentID())) {
 				newEntityComponent = new ComponentPhysical(this);
-				((ComponentPhysical)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentCharacter.getComponentID())) {
+				((ComponentPhysical) newEntityComponent).init(componentElement);
+			} else if (componentElement.getName().equals(
+					ComponentCharacter.getComponentID())) {
 				newEntityComponent = new ComponentCharacter(this);
-				((ComponentCharacter)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentBattle.getComponentID())) {
+				((ComponentCharacter) newEntityComponent)
+						.init(componentElement);
+			} else if (componentElement.getName().equals(
+					ComponentBattle.getComponentID())) {
 				newEntityComponent = new ComponentBattle(this);
-				((ComponentBattle)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentScriptable.getComponentID())) {
+				((ComponentBattle) newEntityComponent).init(componentElement);
+			} else if (componentElement.getName().equals(
+					ComponentScriptable.getComponentID())) {
 				newEntityComponent = new ComponentScriptable(this);
-				((ComponentScriptable)newEntityComponent).init(componentElement);
-			}
-			else	
-				throw new InvalidTagException("valid component name", componentElement.getName());
-			
+				((ComponentScriptable) newEntityComponent)
+						.init(componentElement);
+			} else
+				throw new InvalidTagException("valid component name",
+						componentElement.getName());
+
 			Component.checkAdditionValidity(this, newEntityComponent);
 			this.addComponent(newEntityComponent);
 		}
@@ -75,9 +79,11 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 		for (Component component : this)
 			((EntityComponent) component).update(container, delta, scene);
 	}
+
 	public void render(GameContainer container, Graphics g, Scene scene) {
 		if (this.hasComponent("drawable"))
-			((ComponentDrawable) getComponent("drawable")).render(container, g, scene);
+			((ComponentDrawable) getComponent("drawable")).render(container, g,
+					scene);
 	}
 
 	// Getters and setters
@@ -88,9 +94,12 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 	// Commands
 	public void executeCommand(CommandInstance command) {
 		if (this.hasComponent("scriptable"))
-			((ComponentScriptable) getComponent("scriptable")).executeCommand(command);
+			((ComponentScriptable) getComponent("scriptable"))
+					.executeCommand(command);
 		else
-			throw new CommandException("Entity '" + this.getID()
-					+ "' cannot execute command because it does not have a scriptable component");
+			throw new CommandException(
+					"Entity '"
+							+ this.getID()
+							+ "' cannot execute command because it does not have a scriptable component");
 	}
 }

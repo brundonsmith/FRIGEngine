@@ -7,7 +7,6 @@ import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
@@ -32,6 +31,7 @@ public abstract class Scene extends IDable {
 	public Scene(String id) {
 		this.id = id;
 	}
+
 	public void init(XMLElement xmlElement) {
 
 		this.id = xmlElement.getAttribute("id", this.getID());
@@ -76,13 +76,16 @@ public abstract class Scene extends IDable {
 
 		// Entities
 		entities = new IDableCollection<Entity>();
-		for (int i = 0; i < xmlElement.getChildrenByName("entity_reference").size(); i++) {
-			XMLElement child = xmlElement.getChildrenByName("entity_reference").get(i);
+		for (int i = 0; i < xmlElement.getChildrenByName("entity_reference")
+				.size(); i++) {
+			XMLElement child = xmlElement.getChildrenByName("entity_reference")
+					.get(i);
 
 			// ID entity
 			Entity entity;
 			if (child.getAttribute("id") == null)
-				throw new DataParseException("Entity ID unspecified in area '" + this.id + "'");
+				throw new DataParseException("Entity ID unspecified in area '"
+						+ this.id + "'");
 			entity = FRIGGame.instance.getEntity(child.getAttribute("id"));
 			this.addEntityToScene(entity.getID());
 
@@ -91,7 +94,8 @@ public abstract class Scene extends IDable {
 				float x;
 				try {
 					x = (float) child.getDoubleAttribute("x",
-							((ComponentSpacial) entity.getComponent("spacial")).getX());
+							((ComponentSpacial) entity.getComponent("spacial"))
+									.getX());
 				} catch (SlickXMLException e) {
 					throw new AttributeFormatException("entity_reference", "x",
 							child.getAttribute("x"));
@@ -99,37 +103,43 @@ public abstract class Scene extends IDable {
 				float y;
 				try {
 					y = (float) child.getDoubleAttribute("y",
-							((ComponentSpacial) entity.getComponent("spacial")).getY());
+							((ComponentSpacial) entity.getComponent("spacial"))
+									.getY());
 				} catch (SlickXMLException e) {
 					throw new AttributeFormatException("entity_reference", "y",
 							child.getAttribute("y"));
 				}
 
-				((ComponentSpacial) entity.getComponent("spacial")).moveTo(x, y);
+				((ComponentSpacial) entity.getComponent("spacial"))
+						.moveTo(x, y);
 			}
 			if (entity.hasComponent("drawable")) {
-				((ComponentDrawable) entity.getComponent("drawable")).setContinuousAnimation(child
-						.getAttribute("animation", ((ComponentDrawable) entity
-								.getComponent("drawable")).getContinuousAnimationID()));
+				((ComponentDrawable) entity.getComponent("drawable"))
+						.setContinuousAnimation(child.getAttribute("animation",
+								((ComponentDrawable) entity
+										.getComponent("drawable"))
+										.getContinuousAnimationID()));
 			}
 			if (entity.hasComponent("character")) {
 				try {
 					((ComponentCharacter) entity.getComponent("character"))
-							.setMoveSpeed((float) child.getDoubleAttribute("speed",
-									((ComponentCharacter) entity.getComponent("character"))
+							.setMoveSpeed((float) child.getDoubleAttribute(
+									"speed", ((ComponentCharacter) entity
+											.getComponent("character"))
 											.getMoveSpeed()));
 				} catch (SlickXMLException e) {
-					throw new AttributeFormatException("entity_reference", "speed",
-							child.getAttribute("speed"));
+					throw new AttributeFormatException("entity_reference",
+							"speed", child.getAttribute("speed"));
 				}
 				try {
 					((ComponentCharacter) entity.getComponent("character"))
-							.setDirection((float) child.getDoubleAttribute("direction",
-									((ComponentCharacter) entity.getComponent("character"))
+							.setDirection((float) child.getDoubleAttribute(
+									"direction", ((ComponentCharacter) entity
+											.getComponent("character"))
 											.getDirection()));
 				} catch (SlickXMLException e) {
-					throw new AttributeFormatException("entity_reference", "direction",
-							child.getAttribute("direction"));
+					throw new AttributeFormatException("entity_reference",
+							"direction", child.getAttribute("direction"));
 				}
 			}
 		}
@@ -167,6 +177,7 @@ public abstract class Scene extends IDable {
 		for (Entity entity : entities)
 			entity.update(container, delta, this);
 	}
+
 	public void render(GameContainer container, Graphics g) {
 		for (SceneLayer layer : layers)
 			if (layer.getDepth() <= 0)
@@ -184,7 +195,9 @@ public abstract class Scene extends IDable {
 			if (layer.getDepth() > 0)
 				layer.render(container, g, this);
 	}
-	public void renderObject(GameContainer container, Graphics g, Image image, Rectangle presence) {
+
+	public void renderObject(GameContainer container, Graphics g, Image image,
+			Rectangle presence) {
 		g.drawImage(
 				image,
 				0,
@@ -192,20 +205,27 @@ public abstract class Scene extends IDable {
 				image.getWidth(),
 				image.getHeight(),
 				(presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera().getWidth()),
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth()),
 				(presence.getY() - getCurrentCamera().getY())
-						* ((float) container.getScreenHeight() / getCurrentCamera().getHeight()),
+						* ((float) container.getScreenHeight() / getCurrentCamera()
+								.getHeight()),
 				(presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera().getWidth())
-						+ (presence.getWidth() * ((float) container.getScreenWidth() / getCurrentCamera()
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth())
+						+ (presence.getWidth() * ((float) container
+								.getScreenWidth() / getCurrentCamera()
 								.getWidth())),
 				(presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera().getWidth())
-						+ (presence.getHeight() * ((float) container.getScreenHeight() / getCurrentCamera()
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth())
+						+ (presence.getHeight() * ((float) container
+								.getScreenHeight() / getCurrentCamera()
 								.getHeight())));
 	}
-	public void renderObject(GameContainer container, Graphics g, FRIGAnimation animation,
-			Rectangle presence) {
+
+	public void renderObject(GameContainer container, Graphics g,
+			FRIGAnimation animation, Rectangle presence) {
 		Image image = animation.getCurrentFrame();
 		g.drawImage(
 				image,
@@ -214,71 +234,101 @@ public abstract class Scene extends IDable {
 				image.getWidth(),
 				image.getHeight(),
 				(presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera().getWidth()),
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth()),
 				(presence.getY() - getCurrentCamera().getY())
-						* ((float) container.getScreenHeight() / getCurrentCamera().getHeight()),
+						* ((float) container.getScreenHeight() / getCurrentCamera()
+								.getHeight()),
 				(presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera().getWidth())
-						+ (presence.getWidth() * ((float) container.getScreenWidth() / getCurrentCamera()
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth())
+						+ (presence.getWidth() * ((float) container
+								.getScreenWidth() / getCurrentCamera()
 								.getWidth())),
 				(presence.getY() - getCurrentCamera().getY())
-						* ((float) container.getScreenHeight() / getCurrentCamera().getHeight())
-						+ (presence.getHeight() * ((float) container.getScreenHeight() / getCurrentCamera()
+						* ((float) container.getScreenHeight() / getCurrentCamera()
+								.getHeight())
+						+ (presence.getHeight() * ((float) container
+								.getScreenHeight() / getCurrentCamera()
 								.getHeight())));
 	}
-	public void renderLayer(GameContainer container, Graphics g, Image image, int depth) {
+
+	public void renderLayer(GameContainer container, Graphics g, Image image,
+			int depth) {
 		double scale = Math.pow(2, depth);
 		Rectangle destination = new Rectangle(0, 0, 0, 0);
 		// IF BROKEN, investigate position, width vs position1, position2
+		destination.setWidth((int) (scale
+				* (float) this.getPresence().getWidth() * ((float) container
+				.getScreenWidth() / (float) getCurrentCamera().getWidth())));
+		destination.setHeight((int) (scale
+				* (float) this.getPresence().getHeight() * ((float) container
+				.getScreenHeight() / (float) getCurrentCamera().getHeight())));
 		destination
-				.setWidth((int) (scale * (float) this.getPresence().getWidth() * ((float) container
-						.getScreenWidth() / (float) getCurrentCamera().getWidth())));
+				.setCenterX((float) (scale
+						* (this.getPresence().getCenterX() - getCurrentCamera()
+								.getCenter().getX())
+						+ getCurrentCamera().getWidth() / 2 - scale
+						* this.getPresence().getWidth() / 2)
+						* ((float) container.getScreenWidth() / (float) getCurrentCamera()
+								.getWidth()));
 		destination
-				.setHeight((int) (scale * (float) this.getPresence().getHeight() * ((float) container
-						.getScreenHeight() / (float) getCurrentCamera().getHeight())));
-		destination.setCenterX((float) (scale
-				* (this.getPresence().getCenterX() - getCurrentCamera().getCenter().getX())
-				+ getCurrentCamera().getWidth() / 2 - scale * this.getPresence().getWidth() / 2)
-				* ((float) container.getScreenWidth() / (float) getCurrentCamera().getWidth()));
-		destination.setCenterY((float) (scale
-				* (this.getPresence().getCenterY() - getCurrentCamera().getCenter().getY())
-				+ getCurrentCamera().getHeight() / 2 - scale * this.getPresence().getHeight() / 2)
-				* ((float) container.getScreenHeight() / (float) getCurrentCamera().getHeight()));
+				.setCenterY((float) (scale
+						* (this.getPresence().getCenterY() - getCurrentCamera()
+								.getCenter().getY())
+						+ getCurrentCamera().getHeight() / 2 - scale
+						* this.getPresence().getHeight() / 2)
+						* ((float) container.getScreenHeight() / (float) getCurrentCamera()
+								.getHeight()));
 
-		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), destination.getMinX(),
-				destination.getMinY(), destination.getMaxX(), destination.getMaxY());
+		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(),
+				destination.getMinX(), destination.getMinY(),
+				destination.getMaxX(), destination.getMaxY());
 	}
-	public void renderLayer(GameContainer container, Graphics g, FRIGAnimation animation, int depth) {
+
+	public void renderLayer(GameContainer container, Graphics g,
+			FRIGAnimation animation, int depth) {
 		double scale = Math.pow(2, depth);
 		Rectangle destination = new Rectangle(0, 0, 0, 0);
 
+		destination.setWidth((int) (scale
+				* (float) this.getPresence().getWidth() * ((float) container
+				.getScreenWidth() / (float) getCurrentCamera().getWidth())));
+		destination.setHeight((int) (scale
+				* (float) this.getPresence().getHeight() * ((float) container
+				.getScreenHeight() / (float) getCurrentCamera().getHeight())));
 		destination
-				.setWidth((int) (scale * (float) this.getPresence().getWidth() * ((float) container
-						.getScreenWidth() / (float) getCurrentCamera().getWidth())));
+				.setCenterX((float) (scale
+						* (this.getPresence().getCenterX() - getCurrentCamera()
+								.getCenter().getX())
+						+ getCurrentCamera().getWidth() / 2 - scale
+						* this.getPresence().getWidth() / 2)
+						* ((float) container.getScreenWidth() / (float) getCurrentCamera()
+								.getWidth()));
 		destination
-				.setHeight((int) (scale * (float) this.getPresence().getHeight() * ((float) container
-						.getScreenHeight() / (float) getCurrentCamera().getHeight())));
-		destination.setCenterX((float) (scale
-				* (this.getPresence().getCenterX() - getCurrentCamera().getCenter().getX())
-				+ getCurrentCamera().getWidth() / 2 - scale * this.getPresence().getWidth() / 2)
-				* ((float) container.getScreenWidth() / (float) getCurrentCamera().getWidth()));
-		destination.setCenterY((float) (scale
-				* (this.getPresence().getCenterY() - getCurrentCamera().getCenter().getY())
-				+ getCurrentCamera().getHeight() / 2 - scale * this.getPresence().getHeight() / 2)
-				* ((float) container.getScreenHeight() / (float) getCurrentCamera().getHeight()));
+				.setCenterY((float) (scale
+						* (this.getPresence().getCenterY() - getCurrentCamera()
+								.getCenter().getY())
+						+ getCurrentCamera().getHeight() / 2 - scale
+						* this.getPresence().getHeight() / 2)
+						* ((float) container.getScreenHeight() / (float) getCurrentCamera()
+								.getHeight()));
 
 		Image image = animation.getCurrentFrame();
-		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(), destination.getMinX(),
-				destination.getMinY(), destination.getMaxX(), destination.getMaxY());
+		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(),
+				destination.getMinX(), destination.getMinY(),
+				destination.getMaxX(), destination.getMaxY());
 	}
 
 	// Getters and setters
 	public Rectangle getPresence() {
 		return presence;
 	}
+
 	private Camera getCurrentCamera() {
 		return cameras.get(currentCamera);
 	}
+
 	public IDableCollection<Entity> getEntities() {
 		return entities;
 	}
@@ -287,11 +337,14 @@ public abstract class Scene extends IDable {
 	protected void addEntityToScene(String entityID) {
 		entities.add(FRIGGame.instance.getEntity(entityID));
 	}
+
 	protected void removeEntityFromScene(String entityID) {
 		entities.add(FRIGGame.instance.getEntity(entityID));
 	}
+
 	protected void setMusic(String soundID) {
 	}
+
 	protected void playSound(String soundID) {
 	}
 
@@ -299,15 +352,19 @@ public abstract class Scene extends IDable {
 	public void moveCameraLeft(int increment) {
 		getCurrentCamera().moveLeft(increment);
 	}
+
 	public void moveCameraRight(int increment) {
 		getCurrentCamera().moveRight(increment);
 	}
+
 	public void moveCameraUp(int increment) {
 		getCurrentCamera().moveUp(increment);
 	}
+
 	public void moveCameraDown(int increment) {
 		getCurrentCamera().moveDown(increment);
 	}
+
 	public void zoomCamera(float scale) {
 		getCurrentCamera().zoom(scale);
 	}

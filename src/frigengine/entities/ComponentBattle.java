@@ -10,13 +10,15 @@ public class ComponentBattle extends EntityComponent {
 	public static String getComponentID() {
 		return "battleable";
 	}
+
 	public String getTagName() {
 		return getComponentID();
 	}
-	
+
 	public static String[] getComponentDependencies() {
 		return new String[] {};
 	}
+
 	public static String[] getComponentExclusives() {
 		return new String[] {};
 	}
@@ -26,10 +28,12 @@ public class ComponentBattle extends EntityComponent {
 		super(entity);
 		this.id = getComponentID();
 	}
+
 	@Override
 	public void init(XMLElement xmlElement) {
 		if (!xmlElement.getName().equals(this.getID()))
-			throw new DataParseException("Xml node does not match component type '" + this.id + "'");
+			throw new DataParseException(
+					"Xml node does not match component type '" + this.id + "'");
 	}
 
 	// Main loop methods
