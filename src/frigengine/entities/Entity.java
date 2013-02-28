@@ -8,6 +8,7 @@ import org.newdawn.slick.util.xml.XMLElement;
 import frigengine.Initializable;
 import frigengine.commands.*;
 import frigengine.exceptions.CommandException;
+import frigengine.exceptions.DataParseException;
 import frigengine.exceptions.InvalidTagException;
 import frigengine.scene.*;
 import frigengine.util.*;
@@ -34,39 +35,34 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 		this.name = xmlElement.getAttribute("name", this.id);
 
 		// Load and initialize components
-		for (int i = 0; i < xmlElement.getChildren().size(); i++) {
-			XMLElement componentElement = xmlElement.getChildren().get(i);
+		for (String componentTag : Component.getRegisteredComponents()) {
+			if (xmlElement.getChildrenByName(componentTag).size() > 1)
+				throw new DataParseException("Entity '" + this.getID() + "' has more than one "
+						+ componentTag + " component defined");
+			if (xmlElement.getChildrenByName(componentTag).size() == 1) {
+				XMLElement componentElement = xmlElement.getChildrenByName(componentTag).get(0);
 
-			EntityComponent newEntityComponent;
-			if(componentElement.getName().equals(ComponentSpacial.getComponentID())) {
-				newEntityComponent = new ComponentSpacial(this);
-				((ComponentSpacial)newEntityComponent).init(componentElement);
+				EntityComponent newEntityComponent;
+				if (componentElement.getName().equals(ComponentSpacial.getComponentID()))
+					newEntityComponent = new ComponentSpacial(this);
+				else if (componentElement.getName().equals(ComponentDrawable.getComponentID()))
+					newEntityComponent = new ComponentDrawable(this);
+				else if (componentElement.getName().equals(ComponentPhysical.getComponentID()))
+					newEntityComponent = new ComponentPhysical(this);
+				else if (componentElement.getName().equals(ComponentCharacter.getComponentID()))
+					newEntityComponent = new ComponentCharacter(this);
+				else if (componentElement.getName().equals(ComponentBattle.getComponentID()))
+					newEntityComponent = new ComponentBattle(this);
+				else if (componentElement.getName().equals(ComponentScriptable.getComponentID()))
+					newEntityComponent = new ComponentScriptable(this);
+				else
+					throw new InvalidTagException("valid component name",
+							componentElement.getName());
+
+				Component.checkAdditionValidity(this, newEntityComponent);
+				newEntityComponent.init(componentElement);
+				this.addComponent(newEntityComponent);
 			}
-			else if(componentElement.getName().equals(ComponentDrawable.getComponentID())) {
-				newEntityComponent = new ComponentDrawable(this);
-				((ComponentDrawable)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentPhysical.getComponentID())) {
-				newEntityComponent = new ComponentPhysical(this);
-				((ComponentPhysical)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentCharacter.getComponentID())) {
-				newEntityComponent = new ComponentCharacter(this);
-				((ComponentCharacter)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentBattle.getComponentID())) {
-				newEntityComponent = new ComponentBattle(this);
-				((ComponentBattle)newEntityComponent).init(componentElement);
-			}
-			else if(componentElement.getName().equals(ComponentScriptable.getComponentID())) {
-				newEntityComponent = new ComponentScriptable(this);
-				((ComponentScriptable)newEntityComponent).init(componentElement);
-			}
-			else	
-				throw new InvalidTagException("valid component name", componentElement.getName());
-			
-			Component.checkAdditionValidity(this, newEntityComponent);
-			this.addComponent(newEntityComponent);
 		}
 	}
 

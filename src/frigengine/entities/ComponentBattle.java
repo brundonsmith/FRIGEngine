@@ -13,7 +13,7 @@ public class ComponentBattle extends EntityComponent {
 	public String getTagName() {
 		return getComponentID();
 	}
-	
+
 	public static String[] getComponentDependencies() {
 		return new String[] {};
 	}
@@ -36,5 +36,4 @@ public class ComponentBattle extends EntityComponent {
 	@Override
 	public void update(GameContainer container, int delta, Scene scene) {
 	}
-
 }

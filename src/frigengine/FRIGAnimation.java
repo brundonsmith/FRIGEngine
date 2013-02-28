@@ -68,7 +68,8 @@ public class FRIGAnimation extends IDable implements Initializable {
 
 		// Animation details
 		try {
-			animation = new Animation(sprite, (int)(xmlElement.getDoubleAttribute("spf", 1) * 1000));
+			animation = new Animation(sprite,
+					(int) (xmlElement.getDoubleAttribute("spf", 1) * 1000));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "spf", xmlElement.getAttribute("spf"));
 		}

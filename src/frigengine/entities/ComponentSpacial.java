@@ -16,7 +16,7 @@ public class ComponentSpacial extends EntityComponent {
 	public String getTagName() {
 		return getComponentID();
 	}
-	
+
 	public static String[] getComponentDependencies() {
 		return new String[] {};
 	}

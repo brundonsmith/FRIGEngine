@@ -20,7 +20,7 @@ public class ComponentDrawable extends EntityComponent {
 	public String getTagName() {
 		return getComponentID();
 	}
-	
+
 	public static String[] getComponentDependencies() {
 		return new String[] { "spacial" };
 	}
@@ -49,31 +49,33 @@ public class ComponentDrawable extends EntityComponent {
 		try {
 			presenceX = (float) xmlElement.getDoubleAttribute("width", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "width", xmlElement.getAttribute("width"));
+			throw new AttributeFormatException(this.getTagName(), "width",
+					xmlElement.getAttribute("width"));
 		}
 		float presenceY;
 		try {
 			presenceY = (float) xmlElement.getDoubleAttribute("height", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "height", xmlElement.getAttribute("height"));
+			throw new AttributeFormatException(this.getTagName(), "height",
+					xmlElement.getAttribute("height"));
 		}
 		presence = new Rectangle(0, 0, presenceX, presenceY);
-		
+
 		try {
 			presence.setCenterX((float) xmlElement.getDoubleAttribute("x_offset", 0));
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "x_offset", xmlElement.getAttribute("x_offset"));
+			throw new AttributeFormatException(this.getTagName(), "x_offset",
+					xmlElement.getAttribute("x_offset"));
 		}
 		try {
 			presence.setCenterY((float) xmlElement.getDoubleAttribute("y_offset", 0));
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "y_offset", xmlElement.getAttribute("y_offset"));
+			throw new AttributeFormatException(this.getTagName(), "y_offset",
+					xmlElement.getAttribute("y_offset"));
 		}
-		
+
 		if ((int) presence.getWidth() == 0 || (int) presence.getHeight() == 0)
 			presence = null;
-
-		this.continuousAnimation = xmlElement.getAttribute("default_animation", "animation_0001");
 
 		// Animations
 		this.animations = new IDableCollection<FRIGAnimation>();
@@ -118,7 +120,7 @@ public class ComponentDrawable extends EntityComponent {
 		getActiveAnimation().restart();
 	}
 	public FRIGAnimation getActiveAnimation() {
-		if(animations.contains(activeAnimation))
+		if (animations.contains(activeAnimation))
 			return animations.get(activeAnimation);
 		return null;
 	}
@@ -129,15 +131,15 @@ public class ComponentDrawable extends EntityComponent {
 		activeAnimation = "";
 		if (!continuousAnimation.equals(animation)) {
 			continuousAnimation = animation;
-			if(getContinuousAnimation() == null)
-				throw new ComponentException("Drawable component in entity '" + entity.getID() + "' doesn't contain animation '" + animation + "'");
+			if (getContinuousAnimation() == null)
+				throw new ComponentException("Drawable component in entity '" + entity.getID()
+						+ "' doesn't contain animation '" + animation + "'");
 			getContinuousAnimation().setLooping(true);
 			getContinuousAnimation().start();
 		}
 	}
 	public FRIGAnimation getContinuousAnimation() {
-		String s = continuousAnimation;
-		if(animations.contains(continuousAnimation))
+		if (animations.contains(continuousAnimation))
 			return animations.get(continuousAnimation);
 		return null;
 	}

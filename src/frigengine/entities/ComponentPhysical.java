@@ -20,7 +20,7 @@ public class ComponentPhysical extends EntityComponent {
 	public String getTagName() {
 		return getComponentID();
 	}
-	
+
 	public static String[] getComponentDependencies() {
 		return new String[] { "spacial" };
 	}
@@ -47,12 +47,14 @@ public class ComponentPhysical extends EntityComponent {
 		try {
 			this.collidable = xmlElement.getBooleanAttribute("collidable", true);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "collidable", xmlElement.getAttribute("collidable"));
+			throw new AttributeFormatException(this.getTagName(), "collidable",
+					xmlElement.getAttribute("collidable"));
 		}
 		try {
 			this.movable = xmlElement.getBooleanAttribute("movable", false);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "movable", xmlElement.getAttribute("movable"));
+			throw new AttributeFormatException(this.getTagName(), "movable",
+					xmlElement.getAttribute("movable"));
 		}
 
 		// Shape
@@ -68,55 +70,62 @@ public class ComponentPhysical extends EntityComponent {
 			try {
 				x = (float) xmlElement.getDoubleAttribute("x", 0);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "x", xmlElement.getAttribute("x"));
+				throw new AttributeFormatException(this.getTagName(), "x",
+						xmlElement.getAttribute("x"));
 			}
 			float y;
 			try {
 				y = (float) xmlElement.getDoubleAttribute("y", 0);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "y", xmlElement.getAttribute("y"));
+				throw new AttributeFormatException(this.getTagName(), "y",
+						xmlElement.getAttribute("y"));
 			}
 			float width;
 			try {
 				width = (float) xmlElement.getDoubleAttribute("width", 1);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "width", xmlElement.getAttribute("width"));
+				throw new AttributeFormatException(this.getTagName(), "width",
+						xmlElement.getAttribute("width"));
 			}
 			float height;
 			try {
 				height = (float) xmlElement.getDoubleAttribute("height", 1);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "height", xmlElement.getAttribute("height"));
+				throw new AttributeFormatException(this.getTagName(), "height",
+						xmlElement.getAttribute("height"));
 			}
-			
+
 			this.collisionArea = new Rectangle(x, y, width, height);
-		}
-		else if (xmlElement.getChildren().get(0).getName().equals("ellipse")) {
+		} else if (xmlElement.getChildren().get(0).getName().equals("ellipse")) {
 			float x;
 			try {
 				x = (float) xmlElement.getDoubleAttribute("x", 0);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "x", xmlElement.getAttribute("x"));
+				throw new AttributeFormatException(this.getTagName(), "x",
+						xmlElement.getAttribute("x"));
 			}
 			float y;
 			try {
 				y = (float) xmlElement.getDoubleAttribute("y", 0);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "y", xmlElement.getAttribute("y"));
+				throw new AttributeFormatException(this.getTagName(), "y",
+						xmlElement.getAttribute("y"));
 			}
 			float radius_x;
 			try {
 				radius_x = (float) xmlElement.getDoubleAttribute("radius_x", 1);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "radius_x", xmlElement.getAttribute("radius_x"));
+				throw new AttributeFormatException(this.getTagName(), "radius_x",
+						xmlElement.getAttribute("radius_x"));
 			}
 			float radius_y;
 			try {
 				radius_y = (float) xmlElement.getDoubleAttribute("radius_y", 1);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(), "radius_y", xmlElement.getAttribute("radius_y"));
+				throw new AttributeFormatException(this.getTagName(), "radius_y",
+						xmlElement.getAttribute("radius_y"));
 			}
-			
+
 			this.collisionArea = new Ellipse(x, y, radius_x, radius_y);
 		}
 	}

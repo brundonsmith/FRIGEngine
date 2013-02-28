@@ -16,7 +16,7 @@ public class BattleTemplate extends IDable implements Initializable {
 	public String getTagName() {
 		return "battle";
 	}
-	
+
 	// Attributes
 	private ArrayList<String> playerParty;
 	private ArrayList<String> enemies;

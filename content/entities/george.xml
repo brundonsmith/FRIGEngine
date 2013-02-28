@@ -1,6 +1,6 @@
 <entity name="Bob" >
 	<spacial x="10" y="10"/>
-	<drawable default_animation="stand_s">
+	<drawable>
 		<animation id="stand_nw" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<animation id="stand_n" sprite="content/entities/player_1_idle_n.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<animation id="stand_ne" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
@@ -29,13 +29,13 @@
 		<animation_idle_e id="stand_e"/>
 		<animation_idle_w id="stand_w"/>
 		
-		<animation_idle_nw id="walk_nw"/>
-		<animation_idle_n id="walk_n"/>
-		<animation_idle_ne id="walk_ne"/>
-		<animation_idle_sw id="walk_sw"/>
-		<animation_idle_s id="walk_s"/>
-		<animation_idle_se id="walk_se"/>
-		<animation_idle_e id="walk_e"/>
-		<animation_idle_w id="walk_w"/>
+		<animation_move_nw id="walk_nw"/>
+		<animation_move_n id="walk_n"/>
+		<animation_move_ne id="walk_ne"/>
+		<animation_move_sw id="walk_sw"/>
+		<animation_move_s id="walk_s"/>
+		<animation_move_se id="walk_se"/>
+		<animation_move_e id="walk_e"/>
+		<animation_move_w id="walk_w"/>
 	</character>
 </entity>

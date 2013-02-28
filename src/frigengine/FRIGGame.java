@@ -116,7 +116,7 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 			newBattleTemplate.init(config.parse("content/battles/" + xmlPath));
 			battleTemplates.add(newBattleTemplate);
 		}
-		
+
 		this.update(container, 0);
 	}
 	@Override
