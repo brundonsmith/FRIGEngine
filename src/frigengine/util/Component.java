@@ -18,7 +18,6 @@ public abstract class Component extends IDable {
 	// Other methods
 	protected final static void registerComponent(String id, String[] dependencies,
 			String[] exclusives) {
-		ArrayList<String> al = (ArrayList<String>) Component.registeredComponents;
 
 		boolean legalIndex = false;
 		Arrays.sort(dependencies);
@@ -33,7 +32,6 @@ public abstract class Component extends IDable {
 
 			for (int j = 0; j < i && legalIndex; j++) {
 				Arrays.sort(Component.dependencies.get(registeredComponents.get(j)));
-				String[] d = Component.dependencies.get(registeredComponents.get(j));
 				if (Arrays
 						.binarySearch(Component.dependencies.get(registeredComponents.get(j)), id) >= 0) // If a component before the chosen index depends on this one, invalidate index
 					legalIndex = false;
