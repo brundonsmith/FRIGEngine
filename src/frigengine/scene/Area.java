@@ -19,6 +19,7 @@ public class Area extends Scene implements Initializable {
 	public Area(String id) {
 		super(id);
 	}
+
 	@Override
 	public void init(XMLElement xmlElement) {
 		if (!xmlElement.getName().equals(getTagName()))
@@ -53,9 +54,11 @@ public class Area extends Scene implements Initializable {
 			break;
 		}
 	}
+
 	private void addEntityToArea(String entityID) {
 		this.addEntityToScene(entityID);
 	}
+
 	private void removeEntityFromArea(String entityID) {
 		this.removeEntityFromScene(entityID);
 	}

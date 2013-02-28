@@ -8,9 +8,17 @@ public class InvalidTagException extends DataParseException {
 
 	// Constructors and initialization
 	public InvalidTagException(String expected, String provided) {
-		super("XML tag '" + provided + "' was given when '" + expected + "' was expected");
+		super("XML tag '" + provided + "' was given when '" + expected
+				+ "' was expected");
 		this.expectedTagName = expected;
 		this.providedTagName = provided;
 	}
 
+	public String getExpected() {
+		return this.expectedTagName;
+	}
+
+	public String getProvided() {
+		return this.providedTagName;
+	}
 }

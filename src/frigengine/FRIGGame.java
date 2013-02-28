@@ -49,6 +49,7 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		FRIGGame.instance = this;
 		EntityComponent.registerComponents();
 	}
+
 	@Override
 	public void init(GameContainer container) throws SlickException {
 		// Parse
@@ -64,7 +65,8 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 			throw new InvalidTagException("game", rootElement.getName());
 
 		// Assign attributes
-		((AppGameContainer) container).setTitle(rootElement.getAttribute("title", "Game"));
+		((AppGameContainer) container).setTitle(rootElement.getAttribute(
+				"title", "Game"));
 		this.title = rootElement.getAttribute("title", "Game");
 		this.setCurrentArea(rootElement.getAttribute("starting_area", ""));
 
@@ -112,13 +114,15 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		// Battles
 		battleTemplates = new IDableCollection<BattleTemplate>();
 		for (String xmlPath : new File("content/battles").list(xmlFilter())) {
-			BattleTemplate newBattleTemplate = new BattleTemplate(IDable.iDFromPath(xmlPath));
+			BattleTemplate newBattleTemplate = new BattleTemplate(
+					IDable.iDFromPath(xmlPath));
 			newBattleTemplate.init(config.parse("content/battles/" + xmlPath));
 			battleTemplates.add(newBattleTemplate);
 		}
 
 		this.update(container, 0);
 	}
+
 	@Override
 	public boolean closeRequested() {
 		return true;
@@ -134,7 +138,8 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 
 		// GUI
 		for (GUIFrame frame : guiStack) {
-			frame.update(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
+			frame.update(container, timeStopped ? 0 : delta,
+					inputBlocked ? noInput : input);
 			if (frame.Pausing)
 				timeStopped = true;
 			if (frame.Blocking)
@@ -143,13 +148,16 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 
 		// Battle
 		if (currentBattle != null)
-			currentBattle
-					.update(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
+			currentBattle.update(container, timeStopped ? 0 : delta,
+					inputBlocked ? noInput : input);
 
 		// Area
-		updatePlayer(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
-		getCurrentArea().update(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
+		updatePlayer(container, timeStopped ? 0 : delta, inputBlocked ? noInput
+				: input);
+		getCurrentArea().update(container, timeStopped ? 0 : delta,
+				inputBlocked ? noInput : input);
 	}
+
 	@Override
 	public void render(GameContainer container, Graphics g) {
 		// Area/Battle
@@ -168,15 +176,19 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	public String getTitle() {
 		return this.title;
 	}
+
 	public Entity getPlayer() {
 		return entities.get(player);
 	}
+
 	public Entity getEntity(String id) {
 		return entities.get(id);
 	}
+
 	public void setCurrentArea(String areaID) {
 		currentArea = areaID;
 	}
+
 	public Area getCurrentArea() {
 		return areas.get(currentArea);
 	}
@@ -211,19 +223,26 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		else if (command.getCommandType() == CommandType.ENTITY_COMMAND)
 			entities.get(command.getArguments()[0]).executeCommand(command);
 	}
+
 	private void openDialog(String dialogTemplateID) {
 	}
+
 	private void closeDialog() {
 	}
+
 	private void closeDialogs(String numDialogs) {
 	}
+
 	private void closeAllDialogs() {
 	}
+
 	private void executeScript(String scriptID) {
 	}
+
 	private void changeArea(String areaID) {
 		setCurrentArea(areaID);
 	}
+
 	private void startBattle(String battleTemplate) {
 	}
 
@@ -240,8 +259,10 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		if (input.isKeyPressed(Input.KEY_RIGHT))
 			movement.add(new Vector2f(1, 0));
 
-		((ComponentCharacter) getPlayer().getComponent("character")).move(movement.getTheta());
+		((ComponentCharacter) getPlayer().getComponent("character"))
+				.move(movement.getTheta());
 	}
+
 	private static FilenameFilter xmlFilter() {
 		return new FilenameFilter() {
 			public boolean accept(File dir, String name) {

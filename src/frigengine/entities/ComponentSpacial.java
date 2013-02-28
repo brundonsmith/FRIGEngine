@@ -13,6 +13,7 @@ public class ComponentSpacial extends EntityComponent {
 	public static String getComponentID() {
 		return "spacial";
 	}
+
 	public String getTagName() {
 		return getComponentID();
 	}
@@ -20,6 +21,7 @@ public class ComponentSpacial extends EntityComponent {
 	public static String[] getComponentDependencies() {
 		return new String[] {};
 	}
+
 	public static String[] getComponentExclusives() {
 		return new String[] {};
 	}
@@ -32,23 +34,27 @@ public class ComponentSpacial extends EntityComponent {
 		super(entity);
 		this.id = getComponentID();
 	}
+
 	@Override
 	public void init(XMLElement xmlElement) {
 		if (!xmlElement.getName().equals(this.getID()))
-			throw new DataParseException("Xml node does not match component type '" + this.id + "'");
+			throw new DataParseException(
+					"Xml node does not match component type '" + this.id + "'");
 
 		// Assign attributes
 		int x;
 		try {
 			x = xmlElement.getIntAttribute("x", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "x", xmlElement.getAttribute("x"));
+			throw new AttributeFormatException(this.getTagName(), "x",
+					xmlElement.getAttribute("x"));
 		}
 		int y;
 		try {
 			y = xmlElement.getIntAttribute("y", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "y", xmlElement.getAttribute("y"));
+			throw new AttributeFormatException(this.getTagName(), "y",
+					xmlElement.getAttribute("y"));
 		}
 		this.position = new Point(x, y);
 	}
@@ -62,18 +68,23 @@ public class ComponentSpacial extends EntityComponent {
 	public void setPosition(Point position) {
 		this.position = position;
 	}
+
 	public Point getPosition() {
 		return position;
 	}
+
 	public void setX(float x) {
 		position.setX(x);
 	}
+
 	public void setY(float y) {
 		position.setY(y);
 	}
+
 	public float getX() {
 		return position.getX();
 	}
+
 	public float getY() {
 		return position.getY();
 	}
@@ -82,18 +93,23 @@ public class ComponentSpacial extends EntityComponent {
 	public void moveTo(float x, float y) {
 		this.setPosition(new Point(x, y));
 	}
+
 	public void moveTo(Point position) {
 		this.setPosition(position);
 	}
+
 	public void moveBy(float x, float y) {
-		this.position = new Point(this.position.getX() + x, this.position.getY() + y);
+		this.position = new Point(this.position.getX() + x,
+				this.position.getY() + y);
 	}
+
 	public void moveBy(Point difference) {
-		this.position = new Point(this.position.getX() + difference.getX(), this.position.getY()
-				+ difference.getY());
+		this.position = new Point(this.position.getX() + difference.getX(),
+				this.position.getY() + difference.getY());
 	}
+
 	public void moveBy(Vector2f difference) {
-		this.position = new Point(this.position.getX() + difference.getX(), this.position.getY()
-				+ difference.getY());
+		this.position = new Point(this.position.getX() + difference.getX(),
+				this.position.getY() + difference.getY());
 	}
 }

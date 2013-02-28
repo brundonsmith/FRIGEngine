@@ -38,12 +38,14 @@ public class Camera extends IDable implements Initializable {
 		try {
 			this.x = (float) xmlElement.getDoubleAttribute("x", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "x", xmlElement.getAttribute("x"));
+			throw new AttributeFormatException(getTagName(), "x",
+					xmlElement.getAttribute("x"));
 		}
 		try {
 			this.y = (float) xmlElement.getDoubleAttribute("y", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "y", xmlElement.getAttribute("y"));
+			throw new AttributeFormatException(getTagName(), "y",
+					xmlElement.getAttribute("y"));
 		}
 		try {
 			this.width = (float) xmlElement.getDoubleAttribute("width", 400);
@@ -63,15 +65,19 @@ public class Camera extends IDable implements Initializable {
 	public float getX() {
 		return x;
 	}
+
 	public float getY() {
 		return y;
 	}
+
 	public float getWidth() {
 		return width;
 	}
+
 	public float getHeight() {
 		return height;
 	}
+
 	public Point getCenter() {
 		return new Point(x + width / 2, y + height / 2);
 	}

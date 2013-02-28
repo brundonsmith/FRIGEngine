@@ -15,6 +15,7 @@ public abstract class IDable {
 	}
 
 	public static String iDFromPath(String contentPath) {
-		return contentPath.split("/")[contentPath.split("/").length - 1].split("\\.")[0];
+		return contentPath.split("/")[contentPath.split("/").length - 1]
+				.split("\\.")[0];
 	}
 }

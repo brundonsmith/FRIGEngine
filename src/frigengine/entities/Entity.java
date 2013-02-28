@@ -2,7 +2,6 @@ package frigengine.entities;
 
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.SlickException;
 import org.newdawn.slick.util.xml.XMLElement;
 
 import frigengine.Initializable;
@@ -13,7 +12,8 @@ import frigengine.exceptions.InvalidTagException;
 import frigengine.scene.*;
 import frigengine.util.*;
 
-public class Entity extends Composable<EntityComponent> implements Initializable {
+public class Entity extends Composable<EntityComponent> implements
+		Initializable {
 	@Override
 	public String getTagName() {
 		return "entity";
@@ -26,6 +26,7 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 	public Entity(String id) {
 		this.id = id;
 	}
+
 	public void init(XMLElement xmlElement) {
 		if (!xmlElement.getName().equals(getTagName()))
 			throw new InvalidTagException(getTagName(), xmlElement.getName());
@@ -71,9 +72,11 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 		for (Component component : this)
 			((EntityComponent) component).update(container, delta, scene);
 	}
+
 	public void render(GameContainer container, Graphics g, Scene scene) {
 		if (this.hasComponent("drawable"))
-			((ComponentDrawable) getComponent("drawable")).render(container, g, scene);
+			((ComponentDrawable) getComponent("drawable")).render(container, g,
+					scene);
 	}
 
 	// Getters and setters
@@ -84,9 +87,12 @@ public class Entity extends Composable<EntityComponent> implements Initializable
 	// Commands
 	public void executeCommand(CommandInstance command) {
 		if (this.hasComponent("scriptable"))
-			((ComponentScriptable) getComponent("scriptable")).executeCommand(command);
+			((ComponentScriptable) getComponent("scriptable"))
+					.executeCommand(command);
 		else
-			throw new CommandException("Entity '" + this.getID()
-					+ "' cannot execute command because it does not have a scriptable component");
+			throw new CommandException(
+					"Entity '"
+							+ this.getID()
+							+ "' cannot execute command because it does not have a scriptable component");
 	}
 }

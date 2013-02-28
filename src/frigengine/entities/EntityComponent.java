@@ -6,7 +6,8 @@ import frigengine.Initializable;
 import frigengine.scene.*;
 import frigengine.util.*;
 
-public abstract class EntityComponent extends Component implements Initializable {
+public abstract class EntityComponent extends Component implements
+		Initializable {
 	public static void registerComponents() {
 		Component.registerComponent(ComponentSpacial.getComponentID(),
 				ComponentSpacial.getComponentDependencies(),

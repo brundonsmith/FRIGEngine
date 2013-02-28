@@ -10,6 +10,7 @@ public class CommandInstance {
 		this.command = Command.valueOf(command);
 		this.arguments = arguments;
 	}
+
 	public CommandInstance(Command command, String[] arguments) {
 		this.command = command;
 		this.arguments = arguments;
@@ -19,9 +20,11 @@ public class CommandInstance {
 	public Command getCommand() {
 		return command;
 	}
+
 	public CommandType getCommandType() {
 		return command.getType();
 	}
+
 	public String[] getArguments() {
 		return arguments;
 	}
