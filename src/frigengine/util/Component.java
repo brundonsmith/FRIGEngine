@@ -1,23 +1,50 @@
 package frigengine.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import frigengine.exceptions.ComponentException;
 
 public abstract class Component extends IDable {
 	// Attributes
-	private static Set<String> registeredComponents = new HashSet<String>();
+	private static List<String> registeredComponents = new ArrayList<String>();
 	private static Map<String, String[]> dependencies = new HashMap<String, String[]>();
 	private static Map<String, String[]> exclusives = new HashMap<String, String[]>();
 
 	// Other methods
-	protected final static void registerComponent(Class<? extends Component> c,
-			String id, String[] dependencies, String[] exclusives) {
-		Component.registeredComponents.add(id);
+	protected final static void registerComponent(String id, String[] dependencies,
+			String[] exclusives) {
+		ArrayList<String> al = (ArrayList<String>) Component.registeredComponents;
+
+		boolean legalIndex = false;
+		Arrays.sort(dependencies);
+		int i;
+		for (i = 0; !legalIndex && i <= registeredComponents.size(); i++) { // Attempt each insert spot
+			legalIndex = true;
+			for (int j = i; j < registeredComponents.size() && legalIndex; j++) {
+				Arrays.sort(Component.dependencies.get(registeredComponents.get(j)));
+				if (Arrays.binarySearch(dependencies, registeredComponents.get(j)) >= 0) // If a component after this index is found in the dependency list, invalidate index
+					legalIndex = false;
+			}
+
+			for (int j = 0; j < i && legalIndex; j++) {
+				Arrays.sort(Component.dependencies.get(registeredComponents.get(j)));
+				String[] d = Component.dependencies.get(registeredComponents.get(j));
+				if (Arrays
+						.binarySearch(Component.dependencies.get(registeredComponents.get(j)), id) >= 0) // If a component before the chosen index depends on this one, invalidate index
+					legalIndex = false;
+			}
+		}
+		i--;
+		if (registeredComponents.size() > 0 && !legalIndex)
+			throw new ComponentException("Component '" + id
+					+ "' has one or more cyclical dependencies");
+
+		Component.registeredComponents.add(i, id);
 		Component.dependencies.put(id, dependencies);
 		Component.exclusives.put(id, exclusives);
 	}
@@ -57,5 +84,9 @@ public abstract class Component extends IDable {
 						+ "' cannot be removed from composable '"
 						+ composable.getID() + "' because component '"
 						+ component.getID() + "' depends on it");
+	}
+
+	public static List<String> getRegisteredComponents() {
+		return Collections.unmodifiableList(Component.registeredComponents);
 	}
 }

@@ -120,15 +120,15 @@ public class ComponentPhysical extends EntityComponent {
 			try {
 				radius_x = (float) xmlElement.getDoubleAttribute("radius_x", 1);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(),
-						"radius_x", xmlElement.getAttribute("radius_x"));
+				throw new AttributeFormatException(this.getTagName(), "radius_x",
+						xmlElement.getAttribute("radius_x"));
 			}
 			float radius_y;
 			try {
 				radius_y = (float) xmlElement.getDoubleAttribute("radius_y", 1);
 			} catch (SlickXMLException e) {
-				throw new AttributeFormatException(this.getTagName(),
-						"radius_y", xmlElement.getAttribute("radius_y"));
+				throw new AttributeFormatException(this.getTagName(), "radius_y",
+						xmlElement.getAttribute("radius_y"));
 			}
 
 			this.collisionArea = new Ellipse(x, y, radius_x, radius_y);

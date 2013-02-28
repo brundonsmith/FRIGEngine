@@ -31,7 +31,10 @@ public class IDableCollection<E extends IDable> implements Iterable<E> {
 	}
 
 	public boolean contains(String id) {
-		return items.containsKey(id);
+		if (id != null) {
+			return items.containsKey(id);
+		}
+		return false;
 	}
 
 	public boolean isEmpty() {

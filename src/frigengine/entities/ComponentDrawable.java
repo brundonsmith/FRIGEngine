@@ -82,9 +82,6 @@ public class ComponentDrawable extends EntityComponent {
 		if ((int) presence.getWidth() == 0 || (int) presence.getHeight() == 0)
 			presence = null;
 
-		this.continuousAnimation = xmlElement.getAttribute("default_animation",
-				"animation_0001");
-
 		// Animations
 		this.animations = new IDableCollection<FRIGAnimation>();
 		for (int i = 0; i < xmlElement.getChildrenByName("animation").size(); i++) {
@@ -146,16 +143,14 @@ public class ComponentDrawable extends EntityComponent {
 		if (!continuousAnimation.equals(animation)) {
 			continuousAnimation = animation;
 			if (getContinuousAnimation() == null)
-				throw new ComponentException("Drawable component in entity '"
-						+ entity.getID() + "' doesn't contain animation '"
-						+ animation + "'");
+				throw new ComponentException("Drawable component in entity '" + entity.getID()
+						+ "' doesn't contain animation '" + animation + "'");
 			getContinuousAnimation().setLooping(true);
 			getContinuousAnimation().start();
 		}
 	}
 
 	public FRIGAnimation getContinuousAnimation() {
-		String s = continuousAnimation;
 		if (animations.contains(continuousAnimation))
 			return animations.get(continuousAnimation);
 		return null;

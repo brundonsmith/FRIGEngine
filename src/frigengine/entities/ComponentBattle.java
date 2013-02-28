@@ -40,5 +40,4 @@ public class ComponentBattle extends EntityComponent {
 	@Override
 	public void update(GameContainer container, int delta, Scene scene) {
 	}
-
 }
