@@ -150,19 +150,19 @@ public abstract class Scene extends IDable {
 		// ///////////////////////////////////////////////////////////////////////////////
 		// TEMPORARY
 
-		if (input.isKeyDown(Input.KEY_W))
-			moveCameraUp(1);
-		if (input.isKeyDown(Input.KEY_A))
-			moveCameraLeft(1);
-		if (input.isKeyDown(Input.KEY_S))
-			moveCameraDown(1);
-		if (input.isKeyDown(Input.KEY_D))
-			moveCameraRight(1);
+		if (input.isKeyPressed(Input.KEY_W))
+			moveCameraUp(5);
+		if (input.isKeyPressed(Input.KEY_A))
+			moveCameraLeft(5);
+		if (input.isKeyPressed(Input.KEY_S))
+			moveCameraDown(5);
+		if (input.isKeyPressed(Input.KEY_D))
+			moveCameraRight(5);
 
-		if (input.isKeyDown(Input.KEY_LSHIFT))
-			zoomCamera((float) 0.99);
-		if (input.isKeyDown(Input.KEY_SPACE))
-			zoomCamera((float) 1.01);
+		if (input.isKeyPressed(Input.KEY_LSHIFT))
+			zoomCamera((float) 0.9);
+		if (input.isKeyPressed(Input.KEY_SPACE))
+			zoomCamera((float) 1.1);
 		/*
 		 * if (keyboardState.GetPressedKeys().Contains(Keys.RightShift))
 		 * FRIGGame.Instance .createDialog(new NotificationDialog(
@@ -188,7 +188,6 @@ public abstract class Scene extends IDable {
 		for (Entity entity : entities)
 			try {
 				entity.render(container, g, this);
-				//System.out.println(entity);
 			} catch (ComponentException e) {
 			}
 
@@ -197,29 +196,94 @@ public abstract class Scene extends IDable {
 				layer.render(container, g, this);
 	}
 
+	public void renderObject(GameContainer container, Graphics g, Image image,
+			Rectangle presence) {
+		g.drawImage(
+				image,
+				0,
+				0,
+				image.getWidth(),
+				image.getHeight(),
+				(presence.getX() - getCurrentCamera().getX())
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth()),
+				(presence.getY() - getCurrentCamera().getY())
+						* ((float) container.getScreenHeight() / getCurrentCamera()
+								.getHeight()),
+				(presence.getX() - getCurrentCamera().getX())
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth())
+						+ (presence.getWidth() * ((float) container
+								.getScreenWidth() / getCurrentCamera()
+								.getWidth())),
+				(presence.getX() - getCurrentCamera().getX())
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth())
+						+ (presence.getHeight() * ((float) container
+								.getScreenHeight() / getCurrentCamera()
+								.getHeight())));
+	}
+
 	public void renderObject(GameContainer container, Graphics g,
 			FRIGAnimation animation, Rectangle presence) {
 		Image image = animation.getCurrentFrame();
 		g.drawImage(
 				image,
-				(int)((presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera()
-								.getWidth())),
-				(int)((presence.getY() - getCurrentCamera().getY())
-						* ((float) container.getScreenHeight() / getCurrentCamera()
-								.getHeight())),
-				(int)((presence.getX() - getCurrentCamera().getX())
-										* ((float) container.getScreenWidth() / getCurrentCamera()
-												.getWidth())) + 
-						(int)(presence.getWidth() * ((float) container.getScreenWidth() / getCurrentCamera().getWidth())),
-				(int)((presence.getY() - getCurrentCamera().getY())
-								* ((float) container.getScreenHeight() / getCurrentCamera()
-										.getHeight())) + 
-						(int)(presence.getHeight() * ((float) container.getScreenHeight() / getCurrentCamera().getHeight())),
 				0,
 				0,
 				image.getWidth(),
-				image.getHeight());
+				image.getHeight(),
+				(presence.getX() - getCurrentCamera().getX())
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth()),
+				(presence.getY() - getCurrentCamera().getY())
+						* ((float) container.getScreenHeight() / getCurrentCamera()
+								.getHeight()),
+				(presence.getX() - getCurrentCamera().getX())
+						* ((float) container.getScreenWidth() / getCurrentCamera()
+								.getWidth())
+						+ (presence.getWidth() * ((float) container
+								.getScreenWidth() / getCurrentCamera()
+								.getWidth())),
+				(presence.getY() - getCurrentCamera().getY())
+						* ((float) container.getScreenHeight() / getCurrentCamera()
+								.getHeight())
+						+ (presence.getHeight() * ((float) container
+								.getScreenHeight() / getCurrentCamera()
+								.getHeight())));
+	}
+
+	public void renderLayer(GameContainer container, Graphics g, Image image,
+			int depth) {
+		double scale = Math.pow(2, depth);
+		Rectangle destination = new Rectangle(0, 0, 0, 0);
+		// IF BROKEN, investigate position, width vs position1, position2
+		destination.setWidth((int) (scale
+				* (float) this.getPresence().getWidth() * ((float) container
+				.getScreenWidth() / (float) getCurrentCamera().getWidth())));
+		destination.setHeight((int) (scale
+				* (float) this.getPresence().getHeight() * ((float) container
+				.getScreenHeight() / (float) getCurrentCamera().getHeight())));
+		destination
+				.setCenterX((float) (scale
+						* (this.getPresence().getCenterX() - getCurrentCamera()
+								.getCenter().getX())
+						+ getCurrentCamera().getWidth() / 2 - scale
+						* this.getPresence().getWidth() / 2)
+						* ((float) container.getScreenWidth() / (float) getCurrentCamera()
+								.getWidth()));
+		destination
+				.setCenterY((float) (scale
+						* (this.getPresence().getCenterY() - getCurrentCamera()
+								.getCenter().getY())
+						+ getCurrentCamera().getHeight() / 2 - scale
+						* this.getPresence().getHeight() / 2)
+						* ((float) container.getScreenHeight() / (float) getCurrentCamera()
+								.getHeight()));
+
+		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(),
+				destination.getMinX(), destination.getMinY(),
+				destination.getMaxX(), destination.getMaxY());
 	}
 
 	public void renderLayer(GameContainer container, Graphics g,
@@ -251,10 +315,9 @@ public abstract class Scene extends IDable {
 								.getHeight()));
 
 		Image image = animation.getCurrentFrame();
-		g.drawImage(image,
+		g.drawImage(image, 0, 0, image.getWidth(), image.getHeight(),
 				destination.getMinX(), destination.getMinY(),
-				destination.getMaxX(), destination.getMaxY(),
-				0, 0, image.getWidth(), image.getHeight());
+				destination.getMaxX(), destination.getMaxY());
 	}
 
 	// Getters and setters

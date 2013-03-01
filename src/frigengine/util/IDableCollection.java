@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Hashtable;
 
+import frigengine.exceptions.IDableException;
+
 public class IDableCollection<E extends IDable> implements Iterable<E> {
 	// Attributes
 	private Map<String, E> items;

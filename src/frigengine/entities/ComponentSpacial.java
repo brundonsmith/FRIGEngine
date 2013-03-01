@@ -112,9 +112,4 @@ public class ComponentSpacial extends EntityComponent {
 		this.position = new Point(this.position.getX() + difference.getX(),
 				this.position.getY() + difference.getY());
 	}
-	
-	@Override
-	public String toString() {
-		return this.getID() + ": " + "(" + this.getX() + ", " + this.getY() + ")";
-	}
 }

@@ -159,9 +159,4 @@ public class ComponentDrawable extends EntityComponent {
 	public String getContinuousAnimationID() {
 		return continuousAnimation;
 	}
-
-	@Override
-	public String toString() {
-		return this.getID() + ": " + getCurrentAnimation().getPresence();
-	}
 }
