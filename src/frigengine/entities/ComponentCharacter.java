@@ -63,7 +63,7 @@ public class ComponentCharacter extends EntityComponent {
 		// Assign attributes
 		moveVector = new Vector2f(0, 0);
 		try {
-			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("speed", 0.01));
+			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("speed", 0.05));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(this.getTagName(), "speed",
 					xmlElement.getAttribute("speed"));
@@ -136,7 +136,7 @@ public class ComponentCharacter extends EntityComponent {
 				.setContinuousAnimation(getCurrentAnimation());
 		if (isMoving())
 			((ComponentSpacial) entity.getComponent("spacial")).moveBy(moveVector.copy().scale(
-					(float)delta / 1000));
+					delta));
 		moveVector = new Vector2f();
 	}
 
@@ -151,7 +151,7 @@ public class ComponentCharacter extends EntityComponent {
 		return this.moveSpeed;
 	}
 	public void setDirection(double direction) {
-		this.direction = direction;
+		this.moveVector.setTheta(direction);
 	}
 	public double getDirection() {
 		return this.direction;
@@ -160,22 +160,22 @@ public class ComponentCharacter extends EntityComponent {
 		return moveVector.length() > STANDING_STILL;
 	}
 	private String getCurrentAnimation() {
-		if (337.5 <= direction || direction < 22.5)
+		if (337.5 <= moveVector.getTheta() || moveVector.getTheta() < 22.5)
 			return isMoving() ? animationMoveE : animationIdleE;
-		if (22.5 <= this.direction && this.direction < 67.5)
-			return isMoving() ? animationMoveSE : animationIdleSE;
-		if (67.5 <= this.direction && this.direction < 112.5)
-			return isMoving() ? animationMoveS : animationIdleS;
-		if (112.5 <= this.direction && this.direction < 157.5)
-			return isMoving() ? animationMoveSW : animationIdleSW;
-		if (157.5 <= this.direction && this.direction < 202.5)
-			return isMoving() ? animationMoveW : animationIdleW;
-		if (202.5 <= this.direction && this.direction < 247.5)
-			return isMoving() ? animationMoveNW : animationIdleNW;
-		if (247.5 <= this.direction && this.direction < 292.5)
-			return isMoving() ? animationMoveN : animationIdleN;
-		if (292.5 <= this.direction && this.direction < 337.5)
+		if (22.5 <= moveVector.getTheta() && moveVector.getTheta() < 67.5)
 			return isMoving() ? animationMoveNE : animationIdleNE;
+		if (67.5 <= moveVector.getTheta() && moveVector.getTheta() < 112.5)
+			return isMoving() ? animationMoveN : animationIdleN;
+		if (112.5 <= moveVector.getTheta() && moveVector.getTheta() < 157.5)
+			return isMoving() ? animationMoveNW : animationIdleNW;
+		if (157.5 <= moveVector.getTheta() && moveVector.getTheta() < 202.5)
+			return isMoving() ? animationMoveW : animationIdleW;
+		if (202.5 <= moveVector.getTheta() && moveVector.getTheta() < 247.5)
+			return isMoving() ? animationMoveSW : animationIdleSW;
+		if (247.5 <= moveVector.getTheta() && moveVector.getTheta() < 292.5)
+			return isMoving() ? animationMoveS : animationIdleS;
+		if (292.5 <= moveVector.getTheta() && moveVector.getTheta() < 337.5)
+			return isMoving() ? animationMoveSE : animationIdleSE;
 		return "";
 	}
 
@@ -196,8 +196,4 @@ public class ComponentCharacter extends EntityComponent {
 		this.moveVector.setTheta(this.direction);
 	}
 
-	@Override
-	public String toString() {
-		return this.getID() + ": moveSpeed-" + this.moveSpeed + " direction-" + this.direction + " movementVector-" + this.moveVector;
-	}
 }

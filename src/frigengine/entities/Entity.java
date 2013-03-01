@@ -95,13 +95,4 @@ public class Entity extends Composable<EntityComponent> implements
 							+ this.getID()
 							+ "' cannot execute command because it does not have a scriptable component");
 	}
-	
-	@Override
-	public String toString() {
-		String result = this.getID() + ": {\n";
-		for(Component c : this) {
-			result += "\t" + c.toString() + "\n";
-		}
-		return result + "}";
-	}
 }
