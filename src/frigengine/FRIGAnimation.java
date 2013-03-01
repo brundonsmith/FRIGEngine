@@ -69,15 +69,15 @@ public class FRIGAnimation extends IDable implements Initializable {
 
 		// Animation details
 		try {
-			animation = new Animation(sprite,
+			this.animation = new Animation(sprite,
 					(int) (xmlElement.getDoubleAttribute("spf", 1) * 1000));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "spf",
 					xmlElement.getAttribute("spf"));
 		}
-		animation.setAutoUpdate(false);
+		this.animation.setAutoUpdate(false);
 		try {
-			animation.setLooping(xmlElement
+			this.animation.setLooping(xmlElement
 					.getBooleanAttribute("looping", true));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "looping",
@@ -102,7 +102,7 @@ public class FRIGAnimation extends IDable implements Initializable {
 		float width;
 		try {
 			width = (float) xmlElement.getDoubleAttribute("width",
-					sprite.getWidth());
+					animation.getWidth());
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "width",
 					xmlElement.getAttribute("width"));
@@ -110,7 +110,7 @@ public class FRIGAnimation extends IDable implements Initializable {
 		float height;
 		try {
 			height = (float) xmlElement.getDoubleAttribute("height",
-					sprite.getHeight());
+					animation.getHeight());
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "height",
 					xmlElement.getAttribute("height"));

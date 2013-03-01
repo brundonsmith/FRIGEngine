@@ -1,7 +1,10 @@
-<area name="Old House">
+<area name="Old House" width="500" height="400">
 	<camera x="0" y="0" width="100" height="75" />
 	<layer depth="0" priority="0">
 		<animation id="house_background" sprite="content/areas/final-fantasy-vi.jpg" rows="1" cols="1" />
+	</layer>
+	<layer depth="1" priority="0">
+		<animation id="fog" sprite="content/areas/rock_overlay.png" rows="1" cols="1" />
 	</layer>
 	<entity_reference id="george" />
 </area>

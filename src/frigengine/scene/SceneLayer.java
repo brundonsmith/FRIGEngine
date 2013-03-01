@@ -57,6 +57,9 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 	public int getDepth() {
 		return depth;
 	}
+	public int getPriority() {
+		return priority;
+	}
 
 	// Other methods
 	@Override
@@ -64,5 +67,10 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 		if (this.depth != other.depth)
 			return this.depth - other.depth;
 		return this.priority - other.priority;
+	}
+	
+	@Override
+	public String toString() {
+		return "layer: depth-" + this.getDepth() + " priority-" + this.getPriority();
 	}
 }

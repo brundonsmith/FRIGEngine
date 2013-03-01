@@ -1,21 +1,21 @@
 <entity name="Bob" >
 	<spacial x="10" y="10"/>
 	<drawable>
-		<animation id="stand_nw" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_n" sprite="content/entities/player_1_idle_n.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_ne" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_sw" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_s" sprite="content/entities/player_1_idle_s.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_se" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_e" sprite="content/entities/player_1_idle_e.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="stand_w" sprite="content/entities/player_1_idle_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="stand_nw" sprite="content/entities/player_1_idle_n.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_n" sprite="content/entities/player_1_idle_n.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_ne" sprite="content/entities/player_1_idle_n.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_sw" sprite="content/entities/player_1_idle_s.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_s" sprite="content/entities/player_1_idle_s.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_se" sprite="content/entities/player_1_idle_s.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_e" sprite="content/entities/player_1_idle_e.png" rows="1" cols="1" looping="true" spf="0.2" />
+		<animation id="stand_w" sprite="content/entities/player_1_idle_w.png" rows="1" cols="1" looping="true" spf="0.2" />
 		
-		<animation id="walk_nw" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_nw" sprite="content/entities/player_1_move_n.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<animation id="walk_n" sprite="content/entities/player_1_move_n.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="walk_ne" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="walk_sw" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_ne" sprite="content/entities/player_1_move_n.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_sw" sprite="content/entities/player_1_move_s.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<animation id="walk_s" sprite="content/entities/player_1_move_s.png" rows="1" cols="3" looping="true" spf="0.2" />
-		<animation id="walk_se" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
+		<animation id="walk_se" sprite="content/entities/player_1_move_s.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<animation id="walk_e" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<animation id="walk_w" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
 	</drawable>
