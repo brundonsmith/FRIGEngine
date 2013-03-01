@@ -113,4 +113,9 @@ public class Camera extends IDable implements Initializable {
 		y -= diffY / 2;
 		height = height / scale;
 	}
+	
+	@Override
+	public String toString() {
+		return this.getID() + ": " + "(" + this.getX() + ", " + this.getY() + ") " + this.getWidth() + "x" + this.getHeight();
+	}
 }

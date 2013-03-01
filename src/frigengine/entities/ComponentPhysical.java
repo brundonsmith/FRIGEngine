@@ -174,4 +174,10 @@ public class ComponentPhysical extends EntityComponent {
 								.getX(), ((ComponentSpacial) this.entity
 								.getComponent("spaciaL")).getY()));
 	}
+	
+
+	@Override
+	public String toString() {
+		return this.getID() + ": collidable-" + this.collidable + " movable-" + this.movable + " collisionArea-" + this.collisionArea;
+	}
 }
