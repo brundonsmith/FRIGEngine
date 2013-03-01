@@ -250,18 +250,17 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	private void updatePlayer(GameContainer container, int delta, Input input) {
 		Vector2f movement = new Vector2f();
 
-		if (input.isKeyDown(Input.KEY_UP))
-			movement.add(new Vector2f(0, -1));
-		if (input.isKeyDown(Input.KEY_DOWN))
+		if (input.isKeyPressed(Input.KEY_UP))
 			movement.add(new Vector2f(0, 1));
-		if (input.isKeyDown(Input.KEY_LEFT))
+		if (input.isKeyPressed(Input.KEY_DOWN))
+			movement.add(new Vector2f(0, -1));
+		if (input.isKeyPressed(Input.KEY_LEFT))
 			movement.add(new Vector2f(-1, 0));
-		if (input.isKeyDown(Input.KEY_RIGHT))
+		if (input.isKeyPressed(Input.KEY_RIGHT))
 			movement.add(new Vector2f(1, 0));
 
-		if(movement.length() > 0.5)
-			((ComponentCharacter) getPlayer().getComponent("character"))
-					.move(movement.getTheta());
+		((ComponentCharacter) getPlayer().getComponent("character"))
+				.move(movement.getTheta());
 	}
 
 	private static FilenameFilter xmlFilter() {
