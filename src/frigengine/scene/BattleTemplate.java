@@ -14,9 +14,7 @@ public class BattleTemplate extends IDable implements Initializable {
 	}
 
 	// Attributes
-	@SuppressWarnings("unused")
 	private ArrayList<String> playerParty;
-	@SuppressWarnings("unused")
 	private ArrayList<String> enemies;
 
 	// Constructors and initialization

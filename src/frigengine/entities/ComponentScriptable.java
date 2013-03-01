@@ -28,7 +28,6 @@ public class ComponentScriptable extends EntityComponent {
 	}
 
 	// Attributes
-	@SuppressWarnings("unused")
 	private Queue<Point> waypoints;
 
 	// Constructors and initialization
@@ -65,12 +64,9 @@ public class ComponentScriptable extends EntityComponent {
 		switch (command.getCommand()) {
 		case POSITION_ENTITY:
 			break;
-		default:
-			
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private void positionEntity(String x, String y) {
 		/*
 		 * int xVal, yVal;
@@ -92,7 +88,6 @@ public class ComponentScriptable extends EntityComponent {
 		 */
 	}
 
-	@SuppressWarnings("unused")
 	private void moveEntity(String x, String y) {
 		/*
 		 * float xVal, yVal;
@@ -119,19 +114,15 @@ public class ComponentScriptable extends EntityComponent {
 		 */
 	}
 
-	@SuppressWarnings("unused")
 	private void giveItem(String itemID) {
 	}
 
-	@SuppressWarnings("unused")
 	private void giveItems(String itemID, String numItems) {
 	}
 
-	@SuppressWarnings("unused")
 	private void removeItem(String itemID) {
 	}
 
-	@SuppressWarnings("unused")
 	private void removeItems(String itemID, String numItems) {
 	}
 }
