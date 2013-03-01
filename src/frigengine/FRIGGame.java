@@ -230,6 +230,7 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	private void closeDialog() {
 	}
 
+	@SuppressWarnings("unused")
 	private void closeDialogs(String numDialogs) {
 	}
 
