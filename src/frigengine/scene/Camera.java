@@ -1,6 +1,7 @@
 package frigengine.scene;
 
 import org.newdawn.slick.geom.Point;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
@@ -18,10 +19,7 @@ public class Camera extends IDable implements Initializable {
 	}
 
 	// Attributes
-	private float x;
-	private float y;
-	private float width;
-	private float height;
+	private Rectangle presence;
 
 	// Constructors and initialization
 	public Camera() {
@@ -35,83 +33,94 @@ public class Camera extends IDable implements Initializable {
 
 		// Attributes
 		this.id = xmlElement.getAttribute("id", this.getID());
+		
+		float x;
 		try {
-			this.x = (float) xmlElement.getDoubleAttribute("x", 0);
+			x = (float) xmlElement.getDoubleAttribute("x", 0);
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "x",
 					xmlElement.getAttribute("x"));
 		}
+		float y;
 		try {
-			this.y = (float) xmlElement.getDoubleAttribute("y", 0);
+			y = (float) xmlElement.getDoubleAttribute("y", 0);
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "y",
 					xmlElement.getAttribute("y"));
 		}
+		float width;
 		try {
-			this.width = (float) xmlElement.getDoubleAttribute("width", 400);
+			width = (float) xmlElement.getDoubleAttribute("width", 400);
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "width",
 					xmlElement.getAttribute("width"));
 		}
+		float height;
 		try {
-			this.height = (float) xmlElement.getDoubleAttribute("height", 300);
+			height = (float) xmlElement.getDoubleAttribute("height", 300);
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(getTagName(), "height",
 					xmlElement.getAttribute("height"));
 		}
+		
+		this.presence = new Rectangle(0,0,0,0);
+		this.presence.setX(x);
+		this.presence.setY(y);
+		this.presence.setWidth(width);
+		this.presence.setHeight(height);
 	}
 
 	// Getters and setters
 	public float getX() {
-		return x;
+		return presence.getX();
 	}
 
 	public float getY() {
-		return y;
+		return presence.getY();
 	}
 
 	public float getWidth() {
-		return width;
+		return presence.getWidth();
 	}
 
 	public float getHeight() {
-		return height;
+		return presence.getHeight();
 	}
 
 	public Point getCenter() {
-		return new Point(x + width / 2, y + height / 2);
+		return new Point(presence.getCenterX(), presence.getCenterY());
 	}
 
 	public void setCenter(Point center) {
-		x = center.getX() - width / 2;
-		y = center.getY() - height / 2;
+		presence.setCenterX(center.getX());
+		presence.setCenterY(center.getY());
 	}
 
 	// Other Methods
-	public void moveLeft(int increment) {
-		x -= increment;
+	public void moveLeft(float increment) {
+		presence.setCenterX(presence.getCenterX() - increment);
 	}
 
-	public void moveRight(int increment) {
-		x += increment;
+	public void moveRight(float increment) {
+		presence.setCenterX(presence.getCenterX() + increment);
 	}
 
-	public void moveUp(int increment) {
-		y -= increment;
+	public void moveUp(float increment) {
+		presence.setCenterY(presence.getCenterY() - increment);
 	}
 
-	public void moveDown(int increment) {
-		y += increment;
+	public void moveDown(float increment) {
+		presence.setCenterY(presence.getCenterY() + increment);
 	}
 
 	public void zoom(float scale) {
-		float diffX = width / scale - width;
-		x -= diffX / 2;
-		width = width / scale;
+		float centerX = presence.getCenterX();
+		float centerY = presence.getCenterY();
 
-		float diffY = height / scale - height;
-		y -= diffY / 2;
-		height = height / scale;
+		presence.setSize(presence.getWidth() * scale, presence.getHeight() * scale);
+		
+		presence.setCenterX(centerX);
+		presence.setCenterY(centerY);
 	}
 	
 	@Override

@@ -38,4 +38,5 @@
 		<animation_move_e id="walk_e"/>
 		<animation_move_w id="walk_w"/>
 	</character>
-</entity>
+	<physical collidable="true" movable="false">
+		<rectangle width="20" height="30" offset_x="0" offset_y="0"></rectangle></physical></entity>

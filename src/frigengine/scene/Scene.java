@@ -51,7 +51,11 @@ public abstract class Scene extends IDable {
 			throw new AttributeFormatException(xmlElement.getName(), "height",
 					xmlElement.getAttribute("height"));
 		}
-		this.presence = new Rectangle(0, 0, width, height);
+		this.presence = new Rectangle(0,0,0,0);
+		this.presence.setX(0);
+		this.presence.setY(0);
+		this.presence.setWidth(width);
+		this.presence.setHeight(height);
 
 		// Cameras
 		cameras = new IDableCollection<Camera>();
@@ -151,13 +155,13 @@ public abstract class Scene extends IDable {
 		// TEMPORARY
 
 		if (input.isKeyDown(Input.KEY_W))
-			moveCameraUp(1);
+			moveCameraUp(0.1F);
 		if (input.isKeyDown(Input.KEY_A))
-			moveCameraLeft(1);
+			moveCameraLeft(0.1F);
 		if (input.isKeyDown(Input.KEY_S))
-			moveCameraDown(1);
+			moveCameraDown(0.1F);
 		if (input.isKeyDown(Input.KEY_D))
-			moveCameraRight(1);
+			moveCameraRight(0.1F);
 
 		if (input.isKeyDown(Input.KEY_LSHIFT))
 			zoomCamera((float) 0.99);
@@ -176,6 +180,10 @@ public abstract class Scene extends IDable {
 
 		for (Entity entity : entities)
 			entity.update(container, delta, this);
+		
+		System.out.println(getCurrentCamera());
+		for(Entity e : entities)
+			System.out.println(e);
 	}
 
 	public void render(GameContainer container, Graphics g) {
@@ -208,14 +216,10 @@ public abstract class Scene extends IDable {
 				(int)((presence.getY() - getCurrentCamera().getY())
 						* ((float) container.getScreenHeight() / getCurrentCamera()
 								.getHeight())),
-				(int)((presence.getX() - getCurrentCamera().getX())
-										* ((float) container.getScreenWidth() / getCurrentCamera()
-												.getWidth())) + 
-						(int)(presence.getWidth() * ((float) container.getScreenWidth() / getCurrentCamera().getWidth())),
-				(int)((presence.getY() - getCurrentCamera().getY())
-								* ((float) container.getScreenHeight() / getCurrentCamera()
-										.getHeight())) + 
-						(int)(presence.getHeight() * ((float) container.getScreenHeight() / getCurrentCamera().getHeight())),
+				(int)((presence.getX() + presence.getWidth() - getCurrentCamera().getX())
+										* ((float) container.getScreenWidth() / getCurrentCamera().getWidth())),
+				(int)((presence.getY() + presence.getHeight() - getCurrentCamera().getY())
+								* ((float) container.getScreenHeight() / getCurrentCamera().getHeight())),
 				0,
 				0,
 				image.getWidth(),
@@ -225,7 +229,7 @@ public abstract class Scene extends IDable {
 	public void renderLayer(GameContainer container, Graphics g,
 			FRIGAnimation animation, int depth) {
 		double scale = Math.pow(2, depth);
-		Rectangle destination = new Rectangle(0, 0, 0, 0);
+		Rectangle destination = new Rectangle(0,0,0,0);
 
 		destination.setWidth((int) (scale
 				* (float) this.getPresence().getWidth() * ((float) container
@@ -286,19 +290,19 @@ public abstract class Scene extends IDable {
 	}
 
 	// Other methods
-	public void moveCameraLeft(int increment) {
+	public void moveCameraLeft(float increment) {
 		getCurrentCamera().moveLeft(increment);
 	}
 
-	public void moveCameraRight(int increment) {
+	public void moveCameraRight(float increment) {
 		getCurrentCamera().moveRight(increment);
 	}
 
-	public void moveCameraUp(int increment) {
+	public void moveCameraUp(float increment) {
 		getCurrentCamera().moveUp(increment);
 	}
 
-	public void moveCameraDown(int increment) {
+	public void moveCameraDown(float increment) {
 		getCurrentCamera().moveDown(increment);
 	}
 

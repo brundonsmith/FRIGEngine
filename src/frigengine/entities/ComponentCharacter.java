@@ -63,7 +63,7 @@ public class ComponentCharacter extends EntityComponent {
 		// Assign attributes
 		moveVector = new Vector2f(0, 0);
 		try {
-			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("speed", 0.01));
+			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("speed", 0.005));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(this.getTagName(), "speed",
 					xmlElement.getAttribute("speed"));
@@ -183,17 +183,17 @@ public class ComponentCharacter extends EntityComponent {
 	public void move(double direction) {
 		this.direction = direction;
 
-		this.moveVector = new Vector2f();
-		this.moveVector.set(this.moveSpeed, 0);
-		this.moveVector.setTheta(this.direction);
+		this.moveVector = new Vector2f(this.direction);
+		this.moveVector.normalise();
+		this.moveVector.scale(this.moveSpeed);
 	}
 	public void move(int direction, float moveSpeed) {
 		this.direction = direction;
 		this.moveSpeed = moveSpeed;
 
-		this.moveVector = new Vector2f();
-		this.moveVector.set(this.moveSpeed, 0);
-		this.moveVector.setTheta(this.direction);
+		this.moveVector = new Vector2f(this.direction);
+		this.moveVector.normalise();
+		this.moveVector.scale(this.moveSpeed);
 	}
 
 	@Override

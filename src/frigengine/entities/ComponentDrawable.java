@@ -48,37 +48,26 @@ public class ComponentDrawable extends EntityComponent {
 					"Xml node does not match component type '" + this.id + "'");
 
 		// Attributes
-		float presenceX;
+		float presenceWidth;
 		try {
-			presenceX = (float) xmlElement.getDoubleAttribute("width", 0);
+			presenceWidth = (float) xmlElement.getDoubleAttribute("width", 0);
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(this.getTagName(), "width",
 					xmlElement.getAttribute("width"));
 		}
-		float presenceY;
+		float presenceHeight;
 		try {
-			presenceY = (float) xmlElement.getDoubleAttribute("height", 0);
+			presenceHeight = (float) xmlElement.getDoubleAttribute("height", 0);
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(this.getTagName(), "height",
 					xmlElement.getAttribute("height"));
 		}
-		presence = new Rectangle(0, 0, presenceX, presenceY);
-
-		try {
-			presence.setCenterX((float) xmlElement.getDoubleAttribute(
-					"x_offset", 0));
-		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "x_offset",
-					xmlElement.getAttribute("x_offset"));
-		}
-		try {
-			presence.setCenterY((float) xmlElement.getDoubleAttribute(
-					"y_offset", 0));
-		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "y_offset",
-					xmlElement.getAttribute("y_offset"));
-		}
-
+		presence = new Rectangle(0,0,0,0);
+		presence.setX(0);
+		presence.setY(0);
+		presence.setWidth(presenceWidth);
+		presence.setHeight(presenceHeight);
+		
 		if ((int) presence.getWidth() == 0 || (int) presence.getHeight() == 0)
 			presence = null;
 
@@ -102,13 +91,22 @@ public class ComponentDrawable extends EntityComponent {
 	}
 
 	public void render(GameContainer container, Graphics g, Scene scene) {
-		scene.renderObject(container, g, getCurrentAnimation(), new Rectangle(
-				((ComponentSpacial) entity.getComponent("spacial")).getX()
-						+ getCurrentAnimation().getPresence().getX(),
-				((ComponentSpacial) entity.getComponent("spacial")).getY()
-						+ getCurrentAnimation().getPresence().getY(),
-				getCurrentAnimation().getPresence().getWidth(),
-				getCurrentAnimation().getPresence().getHeight()));
+		if(presence == null)
+			scene.renderObject(container, g, getCurrentAnimation(), new Rectangle(
+					((ComponentSpacial) entity.getComponent("spacial")).getX()
+							+ getCurrentAnimation().getPresence().getX() - getCurrentAnimation().getPresence().getWidth() / 2,
+					((ComponentSpacial) entity.getComponent("spacial")).getY()
+							+ getCurrentAnimation().getPresence().getY() - getCurrentAnimation().getPresence().getHeight() / 2,
+					getCurrentAnimation().getPresence().getWidth(),
+					getCurrentAnimation().getPresence().getHeight()));
+		else
+			scene.renderObject(container, g, getCurrentAnimation(), new Rectangle(
+					((ComponentSpacial) entity.getComponent("spacial")).getX()
+							+ presence.getX() - presence.getWidth() / 2,
+					((ComponentSpacial) entity.getComponent("spacial")).getY()
+							+ presence.getY() - presence.getHeight() / 2,
+					presence.getWidth(),
+					presence.getHeight()));
 	}
 
 	// Getters and setters
@@ -151,9 +149,14 @@ public class ComponentDrawable extends EntityComponent {
 	}
 
 	public FRIGAnimation getContinuousAnimation() {
+		if(animations.size() == 0)
+			return FRIGAnimation.getPlaceholder();
+		if (continuousAnimation.equals(""))
+			for(FRIGAnimation a : animations)
+				return a;
 		if (animations.contains(continuousAnimation))
 			return animations.get(continuousAnimation);
-		return null;
+		return FRIGAnimation.getPlaceholder();
 	}
 
 	public String getContinuousAnimationID() {

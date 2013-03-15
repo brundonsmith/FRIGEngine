@@ -223,26 +223,19 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		else if (command.getCommandType() == CommandType.ENTITY_COMMAND)
 			entities.get(command.getArguments()[0]).executeCommand(command);
 	}
-
 	private void openDialog(String dialogTemplateID) {
 	}
-
 	private void closeDialog() {
 	}
-
 	private void closeDialogs(String numDialogs) {
 	}
-
 	private void closeAllDialogs() {
 	}
-
 	private void executeScript(String scriptID) {
 	}
-
 	private void changeArea(String areaID) {
 		setCurrentArea(areaID);
 	}
-
 	private void startBattle(String battleTemplate) {
 	}
 

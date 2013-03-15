@@ -16,7 +16,6 @@ import frigengine.util.IDable;
 
 public class FRIGAnimation extends IDable implements Initializable {
 	private static int animationCount = 0;
-
 	@Override
 	public String getTagName() {
 		return "animation";
@@ -25,6 +24,22 @@ public class FRIGAnimation extends IDable implements Initializable {
 	// Attributes
 	private Animation animation;
 	private Rectangle presence;
+	
+	public static FRIGAnimation getPlaceholder() {
+		FRIGAnimation placeholder = new FRIGAnimation();
+		Image image = null;
+		try {
+			image = new Image(10,10);
+		} catch (SlickException e) {
+			e.printStackTrace();
+		}
+		byte[] textureData = image.getTexture().getTextureData();
+		for(int i = 0; i < textureData.length; i++) {
+			textureData[i] = (byte) 255;
+		}
+		placeholder.animation = new Animation(new Image[]{image}, 1);
+		return placeholder;
+	}
 
 	// Constructors and initialization
 	public FRIGAnimation() {
@@ -115,7 +130,11 @@ public class FRIGAnimation extends IDable implements Initializable {
 			throw new AttributeFormatException(getTagName(), "height",
 					xmlElement.getAttribute("height"));
 		}
-		presence = new Rectangle(offset_x, offset_y, width, height);
+		presence = new Rectangle(0,0,0,0);
+		presence.setX(offset_x);
+		presence.setY(offset_y);
+		presence.setWidth(width);
+		presence.setHeight(height);
 	}
 
 	// Getters and setters

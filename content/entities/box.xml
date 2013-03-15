@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity name="Box">
+	<spacial x="100" y="100"></spacial>
+	<drawable x_offset="0" y_offset="0" width="40" height="40">
+		<animation id="box_animation_1" sprite="content/entities/box.png" rows="1" cols="1" looping="true" spf="1"></animation></drawable>
+	<physical collidable="true" movable="true">
+		<rectangle width="40.0" height="40.0" offset_x="0.0" offset_y="0.0"></rectangle></physical></entity>

@@ -7,4 +7,5 @@
 		<animation id="fog" sprite="content/areas/rock_overlay.png" rows="1" cols="1" />
 	</layer>
 	<entity_reference id="george" />
+	<entity_reference id="box" />
 </area>
