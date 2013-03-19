@@ -14,7 +14,6 @@ public class Script extends IDable {
 	// Constructors and initialization
 	public Script() {
 	}
-
 	public void init(String scriptPath) throws FileNotFoundException {
 		this.id = IDable.iDFromPath(scriptPath);
 
@@ -22,18 +21,13 @@ public class Script extends IDable {
 
 		commands = new ArrayList<CommandInstance>();
 		while (scriptScanner.hasNext())
-			commands.add(parseCommand(scriptScanner.nextLine()));
+			commands.add(CommandInstance.parseCommand(scriptScanner.nextLine()));
 
 		scriptScanner.close();
 	}
 
-	private CommandInstance parseCommand(String line) {
-		return new CommandInstance(line.split("(")[0],
-				line.split("(")[1].split(")")[0].replace(" ", "")
-						.replace("\t", "").split(","));
-	}
-
 	// Other methods
-	public void execute() {
+	public ScriptThread getInstance(String[] args) {
+		return null;
 	}
 }

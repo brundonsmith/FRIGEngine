@@ -1,10 +1,11 @@
 package frigengine.commands;
 
 public enum Command {
-	// Game Commands
-	OPEN_DIALOG, CLOSE_DIALOG, CLOSE_ALL_DIALOGS,
+	// Meta Commands
+	WAIT,
 
-	EXECUTE_SCRIPT, CHANGE_AREA, START_BATTLE,
+	// Game Commands
+	OPEN_DIALOG, CLOSE_DIALOG, CLOSE_ALL_DIALOGS, EXECUTE_SCRIPT, CHANGE_AREA, START_BATTLE,
 
 	// Area Commands
 	ADD_ENTITY_TO_AREA, REMOVE_ENTITY_FROM_AREA, SET_MUSIC, PLAY_SOUND,
@@ -14,6 +15,9 @@ public enum Command {
 
 	public CommandType getType() {
 		switch (this) {
+		case WAIT:
+			return CommandType.META_COMMAND;
+
 		case OPEN_DIALOG:
 		case CLOSE_DIALOG:
 		case CLOSE_ALL_DIALOGS:
@@ -34,8 +38,10 @@ public enum Command {
 		case GIVE_ITEMS:
 		case REMOVE_ITEM:
 		case REMOVE_ITEMS:
-		default:
 			return CommandType.ENTITY_COMMAND;
+
+		default:
+			return CommandType.GAME_COMMAND;
 		}
 	}
 }

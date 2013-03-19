@@ -3,7 +3,9 @@ package frigengine;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.Stack;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.Game;
@@ -25,7 +27,7 @@ import frigengine.util.*;
 
 public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	// Singleton
-	public static FRIGGame instance;
+	private static FRIGGame instance;
 
 	// Attributes
 	private String title;
@@ -36,7 +38,8 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	private String currentArea;
 	private IDableCollection<Area> areas;
 
-	public IDableCollection<Script> scripts;
+	private IDableCollection<Script> scripts;
+	private ThreadPoolExecutor runningScripts;
 
 	private Stack<GUIFrame> guiStack;
 	// private CollectibleCollection<
@@ -49,7 +52,6 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		FRIGGame.instance = this;
 		EntityComponent.registerComponents();
 	}
-
 	@Override
 	public void init(GameContainer container) throws SlickException {
 		// Parse
@@ -65,8 +67,7 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 			throw new InvalidTagException("game", rootElement.getName());
 
 		// Assign attributes
-		((AppGameContainer) container).setTitle(rootElement.getAttribute(
-				"title", "Game"));
+		((AppGameContainer) container).setTitle(rootElement.getAttribute("title", "Game"));
 		this.title = rootElement.getAttribute("title", "Game");
 		this.setCurrentArea(rootElement.getAttribute("starting_area", ""));
 
@@ -114,15 +115,13 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		// Battles
 		battleTemplates = new IDableCollection<BattleTemplate>();
 		for (String xmlPath : new File("content/battles").list(xmlFilter())) {
-			BattleTemplate newBattleTemplate = new BattleTemplate(
-					IDable.iDFromPath(xmlPath));
+			BattleTemplate newBattleTemplate = new BattleTemplate(IDable.iDFromPath(xmlPath));
 			newBattleTemplate.init(config.parse("content/battles/" + xmlPath));
 			battleTemplates.add(newBattleTemplate);
 		}
 
 		this.update(container, 0);
 	}
-
 	@Override
 	public boolean closeRequested() {
 		return true;
@@ -138,8 +137,7 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 
 		// GUI
 		for (GUIFrame frame : guiStack) {
-			frame.update(container, timeStopped ? 0 : delta,
-					inputBlocked ? noInput : input);
+			frame.update(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
 			if (frame.Pausing)
 				timeStopped = true;
 			if (frame.Blocking)
@@ -148,16 +146,28 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 
 		// Battle
 		if (currentBattle != null)
-			currentBattle.update(container, timeStopped ? 0 : delta,
-					inputBlocked ? noInput : input);
+			currentBattle
+					.update(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
 
 		// Area
-		updatePlayer(container, timeStopped ? 0 : delta, inputBlocked ? noInput
-				: input);
-		getCurrentArea().update(container, timeStopped ? 0 : delta,
-				inputBlocked ? noInput : input);
+		updatePlayer(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
+		getCurrentArea().update(container, timeStopped ? 0 : delta, inputBlocked ? noInput : input);
 	}
+	private void updatePlayer(GameContainer container, int delta, Input input) {
+		Vector2f movement = new Vector2f();
 
+		if (input.isKeyDown(Input.KEY_UP))
+			movement.add(new Vector2f(0, -1));
+		if (input.isKeyDown(Input.KEY_DOWN))
+			movement.add(new Vector2f(0, 1));
+		if (input.isKeyDown(Input.KEY_LEFT))
+			movement.add(new Vector2f(-1, 0));
+		if (input.isKeyDown(Input.KEY_RIGHT))
+			movement.add(new Vector2f(1, 0));
+
+		if (movement.length() > 0.5)
+			((ComponentCharacter) getPlayer().getComponent("character")).move(movement.getTheta());
+	}
 	@Override
 	public void render(GameContainer container, Graphics g) {
 		// Area/Battle
@@ -172,23 +182,22 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	}
 
 	// Getters and setters
+	public static FRIGGame getInstance() {
+		return instance;
+	}
 	@Override
 	public String getTitle() {
 		return this.title;
 	}
-
 	public Entity getPlayer() {
 		return entities.get(player);
 	}
-
 	public Entity getEntity(String id) {
 		return entities.get(id);
 	}
-
 	public void setCurrentArea(String areaID) {
 		currentArea = areaID;
 	}
-
 	public Area getCurrentArea() {
 		return areas.get(currentArea);
 	}
@@ -198,7 +207,7 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		if (command.getCommandType() == CommandType.GAME_COMMAND) {
 			switch (command.getCommand()) {
 			case OPEN_DIALOG:
-				openDialog(command.getArguments()[0]);
+				openDialog(command.getArgument(0));
 				break;
 			case CLOSE_DIALOG:
 				closeDialog();
@@ -207,13 +216,13 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 				closeAllDialogs();
 				break;
 			case EXECUTE_SCRIPT:
-				executeScript(command.getArguments()[0]);
+				executeScript(command.getArgument(0), command.getArguments().length == 1 ? null : Arrays.copyOfRange(command.getArguments(), 1, command.getArguments().length));
 				break;
 			case CHANGE_AREA:
-				changeArea(command.getArguments()[0]);
+				changeArea(command.getArgument(0));
 				break;
 			case START_BATTLE:
-				startBattle(command.getArguments()[0]);
+				startBattle(command.getArgument(0));
 				break;
 			default:
 				break;
@@ -223,6 +232,8 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 		else if (command.getCommandType() == CommandType.ENTITY_COMMAND)
 			entities.get(command.getArguments()[0]).executeCommand(command);
 	}
+	public void executeScript(String scriptID, String[] args) {
+	}
 	private void openDialog(String dialogTemplateID) {
 	}
 	private void closeDialog() {
@@ -231,8 +242,6 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	}
 	private void closeAllDialogs() {
 	}
-	private void executeScript(String scriptID) {
-	}
 	private void changeArea(String areaID) {
 		setCurrentArea(areaID);
 	}
@@ -240,23 +249,6 @@ public class FRIGGame implements Game, GUIFrame.GUICloseEventListener {
 	}
 
 	// Other Methods
-	private void updatePlayer(GameContainer container, int delta, Input input) {
-		Vector2f movement = new Vector2f();
-
-		if (input.isKeyDown(Input.KEY_UP))
-			movement.add(new Vector2f(0, -1));
-		if (input.isKeyDown(Input.KEY_DOWN))
-			movement.add(new Vector2f(0, 1));
-		if (input.isKeyDown(Input.KEY_LEFT))
-			movement.add(new Vector2f(-1, 0));
-		if (input.isKeyDown(Input.KEY_RIGHT))
-			movement.add(new Vector2f(1, 0));
-
-		if(movement.length() > 0.5)
-			((ComponentCharacter) getPlayer().getComponent("character"))
-					.move(movement.getTheta());
-	}
-
 	private static FilenameFilter xmlFilter() {
 		return new FilenameFilter() {
 			public boolean accept(File dir, String name) {

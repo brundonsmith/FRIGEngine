@@ -31,7 +31,6 @@ public abstract class Scene extends IDable {
 	public Scene(String id) {
 		this.id = id;
 	}
-
 	public void init(XMLElement xmlElement) {
 
 		this.id = xmlElement.getAttribute("id", this.getID());
@@ -90,7 +89,7 @@ public abstract class Scene extends IDable {
 			if (child.getAttribute("id") == null)
 				throw new DataParseException("Entity ID unspecified in area '"
 						+ this.id + "'");
-			entity = FRIGGame.instance.getEntity(child.getAttribute("id"));
+			entity = FRIGGame.getInstance().getEntity(child.getAttribute("id"));
 			this.addEntityToScene(entity.getID());
 
 			// Entity components
@@ -185,7 +184,6 @@ public abstract class Scene extends IDable {
 		for(Entity e : entities)
 			System.out.println(e);
 	}
-
 	public void render(GameContainer container, Graphics g) {
 		for (SceneLayer layer : layers)
 			if (layer.getDepth() <= 0)
@@ -204,28 +202,26 @@ public abstract class Scene extends IDable {
 			if (layer.getDepth() > 0)
 				layer.render(container, g, this);
 	}
-
 	public void renderObject(GameContainer container, Graphics g,
 			FRIGAnimation animation, Rectangle presence) {
 		Image image = animation.getCurrentFrame();
 		g.drawImage(
 				image,
 				(int)((presence.getX() - getCurrentCamera().getX())
-						* ((float) container.getScreenWidth() / getCurrentCamera()
+						* ((float) container.getWidth() / getCurrentCamera()
 								.getWidth())),
 				(int)((presence.getY() - getCurrentCamera().getY())
-						* ((float) container.getScreenHeight() / getCurrentCamera()
+						* ((float) container.getHeight() / getCurrentCamera()
 								.getHeight())),
 				(int)((presence.getX() + presence.getWidth() - getCurrentCamera().getX())
-										* ((float) container.getScreenWidth() / getCurrentCamera().getWidth())),
+										* ((float) container.getWidth() / getCurrentCamera().getWidth())),
 				(int)((presence.getY() + presence.getHeight() - getCurrentCamera().getY())
-								* ((float) container.getScreenHeight() / getCurrentCamera().getHeight())),
+								* ((float) container.getHeight() / getCurrentCamera().getHeight())),
 				0,
 				0,
 				image.getWidth(),
 				image.getHeight());
 	}
-
 	public void renderLayer(GameContainer container, Graphics g,
 			FRIGAnimation animation, int depth) {
 		double scale = Math.pow(2, depth);
@@ -233,17 +229,17 @@ public abstract class Scene extends IDable {
 
 		destination.setWidth((int) (scale
 				* (float) this.getPresence().getWidth() * ((float) container
-				.getScreenWidth() / (float) getCurrentCamera().getWidth())));
+				.getWidth() / (float) getCurrentCamera().getWidth())));
 		destination.setHeight((int) (scale
 				* (float) this.getPresence().getHeight() * ((float) container
-				.getScreenHeight() / (float) getCurrentCamera().getHeight())));
+				.getHeight() / (float) getCurrentCamera().getHeight())));
 		destination
 				.setCenterX((float) (scale
 						* (this.getPresence().getCenterX() - getCurrentCamera()
 								.getCenter().getX())
 						+ getCurrentCamera().getWidth() / 2 - scale
 						* this.getPresence().getWidth() / 2)
-						* ((float) container.getScreenWidth() / (float) getCurrentCamera()
+						* ((float) container.getWidth() / (float) getCurrentCamera()
 								.getWidth()));
 		destination
 				.setCenterY((float) (scale
@@ -251,7 +247,7 @@ public abstract class Scene extends IDable {
 								.getCenter().getY())
 						+ getCurrentCamera().getHeight() / 2 - scale
 						* this.getPresence().getHeight() / 2)
-						* ((float) container.getScreenHeight() / (float) getCurrentCamera()
+						* ((float) container.getHeight() / (float) getCurrentCamera()
 								.getHeight()));
 
 		Image image = animation.getCurrentFrame();
@@ -265,27 +261,22 @@ public abstract class Scene extends IDable {
 	public Rectangle getPresence() {
 		return presence;
 	}
-
 	private Camera getCurrentCamera() {
 		return cameras.get(currentCamera);
 	}
-
 	public IDableCollection<Entity> getEntities() {
 		return entities;
 	}
 
 	// Commands
 	protected void addEntityToScene(String entityID) {
-		entities.add(FRIGGame.instance.getEntity(entityID));
+		entities.add(FRIGGame.getInstance().getEntity(entityID));
 	}
-
 	protected void removeEntityFromScene(String entityID) {
-		entities.add(FRIGGame.instance.getEntity(entityID));
+		entities.add(FRIGGame.getInstance().getEntity(entityID));
 	}
-
 	protected void setMusic(String soundID) {
 	}
-
 	protected void playSound(String soundID) {
 	}
 
@@ -293,19 +284,15 @@ public abstract class Scene extends IDable {
 	public void moveCameraLeft(float increment) {
 		getCurrentCamera().moveLeft(increment);
 	}
-
 	public void moveCameraRight(float increment) {
 		getCurrentCamera().moveRight(increment);
 	}
-
 	public void moveCameraUp(float increment) {
 		getCurrentCamera().moveUp(increment);
 	}
-
 	public void moveCameraDown(float increment) {
 		getCurrentCamera().moveDown(increment);
 	}
-
 	public void zoomCamera(float scale) {
 		getCurrentCamera().zoom(scale);
 	}

@@ -39,16 +39,16 @@ public class Area extends Scene implements Initializable {
 	public void executeCommand(CommandInstance command) {
 		switch (command.getCommand()) {
 		case ADD_ENTITY_TO_AREA:
-			this.addEntityToArea(command.getArguments()[1]);
+			this.addEntityToArea(command.getArgument(1));
 			break;
 		case REMOVE_ENTITY_FROM_AREA:
-			this.removeEntityFromArea(command.getArguments()[1]);
+			this.removeEntityFromArea(command.getArgument(1));
 			break;
 		case SET_MUSIC:
-			this.setMusic(command.getArguments()[1]);
+			this.setMusic(command.getArgument(1));
 			break;
 		case PLAY_SOUND:
-			this.playSound(command.getArguments()[1]);
+			this.playSound(command.getArgument(1));
 			break;
 		default:
 			break;
