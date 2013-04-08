@@ -8,6 +8,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Ellipse;
+import org.newdawn.slick.geom.Line;
 import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.util.xml.SlickXMLException;
@@ -133,22 +134,30 @@ public class ComponentPhysical extends EntityComponent {
 	public void update(int delta, Input input, Scene scene) {
 		if (this.collidable && this.movable) {// If collision should be considered
 			// Area collision
-			for(Shape shape : scene.getBoundaries())
+			for(Shape shape : scene.getBoundaries()) {
+				float increment = 0.01F;
 				while (this.getCollisionArea().intersects(shape)) {
+					((ComponentSpacial)this.entity.getComponent(ComponentSpacial.class)).moveBy(calculateCollisionFix(this.getCollisionArea(), shape));
+					/*
 					((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)) // fix its position
 					.moveBy(new Vector2f(this.getCollisionArea().getCenterX(), this.getCollisionArea().getCenterY())
 							.sub(new Vector2f(shape.getCenterX(), shape.getCenterY())).normalise().scale(0.01F));
+					*/
 				}
+			}
 			// Entity collision
 			for (Entity otherEntity : scene.getEntities())
 				// For each entity,
 				if (otherEntity != this.entity // if it's not this entity
 						&& otherEntity.hasComponent(ComponentPhysical.class) // and it's physical
 						&& ((ComponentPhysical) otherEntity // and its collision is turned on
-								.getComponent(ComponentPhysical.class)).collidable)
+								.getComponent(ComponentPhysical.class)).collidable) {
+					float increment = 0.01F;
 					while (this.getCollisionArea().intersects( // If there's an intersection,
 							((ComponentPhysical) otherEntity.getComponent(ComponentPhysical.class))
 									.getCollisionArea())) {
+						((ComponentSpacial)this.entity.getComponent(ComponentSpacial.class)).moveBy(calculateCollisionFix(this.getCollisionArea(), ((ComponentPhysical) otherEntity.getComponent(ComponentPhysical.class)).getCollisionArea()));
+						/*
 						((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)) // fix its position
 								.moveBy(new Vector2f(this.getCollisionArea().getCenterX(), this
 										.getCollisionArea().getCenterY())
@@ -157,11 +166,13 @@ public class ComponentPhysical extends EntityComponent {
 												.getCenterX(), ((ComponentPhysical) otherEntity
 												.getComponent(ComponentPhysical.class)).getCollisionArea()
 												.getCenterY())).normalise().scale(0.01F));
+												*/
 					}
+				}
 		}
 	}
 
-	// Collision
+	// Getters and setters
 	public Shape getCollisionArea() {
 		if (collisionArea instanceof Rectangle)
 			return this.collisionArea.transform(Transform.createTranslateTransform(
@@ -173,6 +184,115 @@ public class ComponentPhysical extends EntityComponent {
 			return this.collisionArea.transform(Transform.createTranslateTransform(
 					((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)).getX(),
 					((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)).getY()));
+	}
+	
+	// Collision calculation
+	private static Vector2f calculateCollisionFix(Shape a, Shape b) {
+		Shape transformedA = a;
+		float fixX = 0;
+		float fixY = 0;
+		
+		float increment = 0.01F;
+		if(b instanceof Line) {
+			while (transformedA.intersects(b)) {
+				Vector2f closest = new Vector2f();
+				((Line)b).getClosestPoint(new Vector2f(a.getCenterX(), a.getCenterY()), closest);
+				Vector2f difference = new Vector2f(a.getCenterX(), a.getCenterY()).sub(closest).normalise().scale(increment);
+				fixX = difference.getX();
+				fixY = difference.getY();
+				transformedA = a.transform(Transform.createTranslateTransform(fixX, fixY));
+				increment += 0.01F;
+			}
+		}
+		else {
+			while (transformedA.intersects(b)) {
+				float currentIntersectRating = getIntersectRating(transformedA, b);
+				
+				float moveX = 0;
+				float xImprovement = currentIntersectRating;
+				if(getIntersectRating(
+						transformedA.transform(Transform.createTranslateTransform(increment, 0)),
+						b
+						) < currentIntersectRating) {
+					moveX = 0.01F;
+					xImprovement = getIntersectRating(
+							transformedA.transform(Transform.createTranslateTransform(increment, 0)),
+							b
+							);
+				}
+				else if(getIntersectRating(
+						transformedA.transform(Transform.createTranslateTransform(-1 * increment, 0)),
+						b
+						) < currentIntersectRating) {
+					moveX = -0.01F;
+					xImprovement = getIntersectRating(
+							transformedA.transform(Transform.createTranslateTransform(-1 * increment, 0)),
+							b
+							);
+				}
+				
+				float moveY = 0;
+				float yImprovement = currentIntersectRating;
+				if(getIntersectRating(
+						transformedA.transform(Transform.createTranslateTransform(0, increment)),
+						b
+						) < currentIntersectRating) {
+					moveY = 0.01F;
+					yImprovement = getIntersectRating(
+							transformedA.transform(Transform.createTranslateTransform(0, increment)),
+							b
+							);
+				}
+				else if(getIntersectRating(
+						transformedA.transform(Transform.createTranslateTransform(0, -1 * increment)),
+						b
+						) < currentIntersectRating) {
+					moveY = -0.01F;
+					yImprovement = getIntersectRating(
+							transformedA.transform(Transform.createTranslateTransform(0, -1 * increment)),
+							b
+							);
+				}
+				
+				if(!(Math.abs(moveX) < 0.001F && Math.abs(moveY) < 0.001F)) {
+					if(currentIntersectRating - xImprovement >= currentIntersectRating - yImprovement)
+						fixX += moveX;
+					else
+						fixY += moveY;
+					increment = 0.01F;
+				}
+				else {
+					increment *= 10;
+				}
+				
+				transformedA = transformedA.transform(Transform.createTranslateTransform(fixX, fixY));
+			}
+		}
+		
+		return new Vector2f(fixX, fixY);
+	}
+	private static float getIntersectRating(Shape a, Shape b) {
+		return (getBoundingRectangleIntersection(a,b) + getBoundingCircleIntersection(a,b)) / 2;
+	}
+	private static float getBoundingRectangleIntersection(Shape a, Shape b) {
+		double xOverlap = Math.max(0, Math.min(a.getMaxX(),b.getMaxX()) - Math.max(a.getMinX(),b.getMinX()));
+        double yOverlap = Math.max(0, Math.min(a.getMaxY(),b.getMaxY()) - Math.max(a.getMinY(),b.getMinY()));
+        return (float)(xOverlap * yOverlap);
+	}
+	private static float getBoundingCircleIntersection(Shape a, Shape b) {
+		double r1 = a.getBoundingCircleRadius();
+		double r2 = b.getBoundingCircleRadius();
+		double d = Math.sqrt(Math.pow(a.getCenterX() - b.getCenterX(), 2) + Math.pow(a.getCenterY() - b.getCenterY(), 2));
+		if(r2 < r1) {
+			double temp = r2;
+			r2 = r1;
+			r1 = temp;
+		}
+		double part1 = r1*r1*Math.acos((d*d + r1*r1 - r2*r2)/(2*d*r1));
+		double part2 = r2*r2*Math.acos((d*d + r2*r2 - r1*r1)/(2*d*r2));
+		double part3 = 0.5*Math.sqrt((-d+r1+r2)*(d+r1-r2)*(d-r1+r2)*(d+r1+r2));
+
+		return (float)(part1 + part2 - part3);
 	}
 
 	// Utilities
