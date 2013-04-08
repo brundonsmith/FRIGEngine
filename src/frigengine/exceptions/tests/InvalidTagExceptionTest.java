@@ -9,13 +9,12 @@ import frigengine.exceptions.InvalidTagException;
 public class InvalidTagExceptionTest {
 	private static final String EXPECTED = "expectedTag";
 	private static final String PROVIDED = "providedTag";
-	private static InvalidTagException ex = new InvalidTagException(EXPECTED,
-			PROVIDED);
+	private static InvalidTagException ex = new InvalidTagException(EXPECTED, PROVIDED);
 
 	@Test
 	public void testGetMessage() {
-		Assert.assertEquals("XML tag '" + PROVIDED + "' was given when '"
-				+ EXPECTED + "' was expected", ex.getMessage());
+		Assert.assertEquals("XML tag '" + PROVIDED + "' was given when '" + EXPECTED
+				+ "' was expected", ex.getMessage());
 	}
 
 	@Test

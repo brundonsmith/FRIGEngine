@@ -7,12 +7,7 @@ import frigengine.Initializable;
 import frigengine.exceptions.InvalidTagException;
 import frigengine.util.*;
 
-public class BattleTemplate extends IDable implements Initializable {
-	@Override
-	public String getTagName() {
-		return "battle";
-	}
-
+public class BattleTemplate extends IDable<String> implements Initializable {
 	// Attributes
 	private ArrayList<String> playerParty;
 	private ArrayList<String> enemies;
@@ -21,12 +16,16 @@ public class BattleTemplate extends IDable implements Initializable {
 	public BattleTemplate(String id) {
 		this.id = id;
 	}
-
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals("battle"))
-			throw new InvalidTagException("battle", xmlElement.getName());
+		if (!xmlElement.getName().equals(BattleTemplate.getTagName()))
+			throw new InvalidTagException(BattleTemplate.getTagName(), xmlElement.getName());
 
 		// Assign attributes
-		this.id = xmlElement.getAttribute("id", this.getID());
+		this.id = xmlElement.getAttribute("id", (String)this.getID());
+	}
+	
+	// Utilities
+	public static String getTagName() {
+		return "battle";
 	}
 }

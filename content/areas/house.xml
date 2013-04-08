@@ -1,11 +1,11 @@
-<area name="Old House" width="500" height="400">
-	<camera x="0" y="0" width="100" height="75" />
-	<layer depth="0" priority="0">
-		<animation id="house_background" sprite="content/areas/final-fantasy-vi.jpg" rows="1" cols="1" />
-	</layer>
-	<layer depth="1" priority="0">
-		<animation id="fog" sprite="content/areas/rock_overlay.png" rows="1" cols="1" />
-	</layer>
+<Area name="Old House" width="500" height="400" player="george">
+	<Camera x="0" y="0" width="160" height="90" id="camera_1"/>
+	<SceneLayer depth="0" priority="0">
+		<FRIGAnimation id="house_background" sprite="content/areas/final-fantasy-vi.jpg" rows="1" cols="1" />
+	</SceneLayer>
+	<SceneLayer depth="1" priority="0">
+		<FRIGAnimation id="fog" sprite="content/areas/rock_overlay.png" rows="1" cols="1" />
+	</SceneLayer>
 	<entity_reference id="george" />
 	<entity_reference id="box" />
-</area>
+</Area>

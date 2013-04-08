@@ -10,13 +10,8 @@ import frigengine.exceptions.AttributeFormatException;
 import frigengine.exceptions.InvalidTagException;
 import frigengine.util.*;
 
-public class Camera extends IDable implements Initializable {
+public class Camera extends IDable<String> implements Initializable {
 	private static int cameraCount = 0;
-
-	@Override
-	public String getTagName() {
-		return "camera";
-	}
 
 	// Attributes
 	private Rectangle presence;
@@ -26,44 +21,41 @@ public class Camera extends IDable implements Initializable {
 		Camera.cameraCount++;
 		this.id = "camera_" + Integer.toString(Camera.cameraCount, 4);
 	}
-
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals(getTagName()))
-			throw new InvalidTagException(getTagName(), xmlElement.getName());
+		if (!xmlElement.getName().equals(this.getClass().getSimpleName()))
+			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
 
-		// Attributes
+		// id
 		this.id = xmlElement.getAttribute("id", this.getID());
-		
+
+		// presence
 		float x;
 		try {
 			x = (float) xmlElement.getDoubleAttribute("x", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "x",
-					xmlElement.getAttribute("x"));
+			throw new AttributeFormatException(xmlElement.getName(), "x", xmlElement.getAttribute("x"));
 		}
 		float y;
 		try {
 			y = (float) xmlElement.getDoubleAttribute("y", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "y",
-					xmlElement.getAttribute("y"));
+			throw new AttributeFormatException(xmlElement.getName(), "y", xmlElement.getAttribute("y"));
 		}
 		float width;
 		try {
 			width = (float) xmlElement.getDoubleAttribute("width", 400);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "width",
+			throw new AttributeFormatException(xmlElement.getName(), "width",
 					xmlElement.getAttribute("width"));
 		}
 		float height;
 		try {
 			height = (float) xmlElement.getDoubleAttribute("height", 300);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "height",
+			throw new AttributeFormatException(xmlElement.getName(), "height",
 					xmlElement.getAttribute("height"));
 		}
-		
-		this.presence = new Rectangle(0,0,0,0);
+		this.presence = new Rectangle(0, 0, 0, 0);
 		this.presence.setX(x);
 		this.presence.setY(y);
 		this.presence.setWidth(width);
@@ -72,59 +64,52 @@ public class Camera extends IDable implements Initializable {
 
 	// Getters and setters
 	public float getX() {
-		return presence.getX();
+		return this.presence.getX();
 	}
-
 	public float getY() {
-		return presence.getY();
+		return this.presence.getY();
 	}
-
 	public float getWidth() {
-		return presence.getWidth();
+		return this.presence.getWidth();
 	}
-
 	public float getHeight() {
-		return presence.getHeight();
+		return this.presence.getHeight();
 	}
-
 	public Point getCenter() {
-		return new Point(presence.getCenterX(), presence.getCenterY());
+		return new Point(this.presence.getCenterX(), this.presence.getCenterY());
 	}
-
 	public void setCenter(Point center) {
-		presence.setCenterX(center.getX());
-		presence.setCenterY(center.getY());
+		this.presence.setCenterX(center.getX());
+		this.presence.setCenterY(center.getY());
 	}
 
 	// Other Methods
 	public void moveLeft(float increment) {
-		presence.setCenterX(presence.getCenterX() - increment);
+		this.presence.setCenterX(this.presence.getCenterX() - increment);
 	}
-
 	public void moveRight(float increment) {
-		presence.setCenterX(presence.getCenterX() + increment);
+		this.presence.setCenterX(this.presence.getCenterX() + increment);
 	}
-
 	public void moveUp(float increment) {
-		presence.setCenterY(presence.getCenterY() - increment);
+		this.presence.setCenterY(this.presence.getCenterY() - increment);
 	}
-
 	public void moveDown(float increment) {
-		presence.setCenterY(presence.getCenterY() + increment);
+		this.presence.setCenterY(this.presence.getCenterY() + increment);
 	}
-
 	public void zoom(float scale) {
-		float centerX = presence.getCenterX();
-		float centerY = presence.getCenterY();
+		float centerX = this.presence.getCenterX();
+		float centerY = this.presence.getCenterY();
 
-		presence.setSize(presence.getWidth() * scale, presence.getHeight() * scale);
-		
-		presence.setCenterX(centerX);
-		presence.setCenterY(centerY);
+		this.presence.setSize(this.presence.getWidth() * scale, this.presence.getHeight() * scale);
+
+		this.presence.setCenterX(centerX);
+		this.presence.setCenterY(centerY);
 	}
-	
+
+	// Utilities
 	@Override
 	public String toString() {
-		return this.getID() + ": " + "(" + this.getX() + ", " + this.getY() + ") " + this.getWidth() + "x" + this.getHeight();
+		return this.getID() + ": " + "(" + this.getX() + ", " + this.getY() + ") "
+				+ this.getWidth() + "x" + this.getHeight();
 	}
 }

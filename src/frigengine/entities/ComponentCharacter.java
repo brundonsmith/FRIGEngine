@@ -1,29 +1,19 @@
 package frigengine.entities;
 
-import org.newdawn.slick.GameContainer;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
 import frigengine.exceptions.AttributeFormatException;
-import frigengine.exceptions.DataParseException;
+import frigengine.exceptions.InvalidTagException;
 import frigengine.scene.*;
 
 public class ComponentCharacter extends EntityComponent {
-	public static String getComponentID() {
-		return "character";
-	}
-	public String getTagName() {
-		return getComponentID();
-	}
-
-	public static String[] getComponentDependencies() {
-		return new String[] { "spacial", "drawable" };
-	}
-	public static String[] getComponentExclusives() {
-		return new String[] {};
-	}
-
 	// Constants
 	private static final float STANDING_STILL = 0.01F;
 
@@ -53,28 +43,32 @@ public class ComponentCharacter extends EntityComponent {
 	// Constructors and initialization
 	public ComponentCharacter(Entity entity) {
 		super(entity);
-		this.id = getComponentID();
 	}
 	@Override
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals(this.getID()))
-			throw new DataParseException("Xml node does not match component type '" + this.id + "'");
+		if (!xmlElement.getName().equals(this.getClass().getSimpleName()))
+			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
 
-		// Assign attributes
-		moveVector = new Vector2f(0, 0);
+		// moveVector
+		this.moveVector = new Vector2f(0, 0);
+		
+		// moveSpeed
 		try {
 			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("speed", 0.005));
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "speed",
+			throw new AttributeFormatException(xmlElement.getName(), "speed",
 					xmlElement.getAttribute("speed"));
 		}
+		
+		// direction
 		try {
-			this.setMoveSpeed((float) xmlElement.getDoubleAttribute("direction", 270));
+			this.setDirection((float) xmlElement.getDoubleAttribute("direction", 90));
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "direction",
+			throw new AttributeFormatException(xmlElement.getName(), "direction",
 					xmlElement.getAttribute("direction"));
 		}
-
+		
+		// animations
 		this.animationIdleNW = xmlElement.getChildrenByName("animation_idle_nw").size() > 0 ? xmlElement
 				.getChildrenByName("animation_idle_nw").get(0).getAttribute("id", "")
 				: null;
@@ -99,7 +93,6 @@ public class ComponentCharacter extends EntityComponent {
 		this.animationIdleW = xmlElement.getChildrenByName("animation_idle_w").size() > 0 ? xmlElement
 				.getChildrenByName("animation_idle_w").get(0).getAttribute("id", "")
 				: null;
-
 		this.animationMoveNW = xmlElement.getChildrenByName("animation_move_nw").size() > 0 ? xmlElement
 				.getChildrenByName("animation_move_nw").get(0).getAttribute("id", "")
 				: null;
@@ -125,18 +118,19 @@ public class ComponentCharacter extends EntityComponent {
 				.getChildrenByName("animation_move_w").get(0).getAttribute("id", "")
 				: null;
 
-		((ComponentDrawable) this.entity.getComponent("drawable"))
+		// Set default animation
+		((ComponentDrawable) this.entity.getComponent(ComponentDrawable.class))
 				.setContinuousAnimation(getCurrentAnimation());
 	}
 
 	// Main loop methods
 	@Override
-	public void update(GameContainer container, int delta, Scene area) {
-		((ComponentDrawable) entity.getComponent("drawable"))
+	public void update(int delta, Input input, Scene area) {
+		((ComponentDrawable) entity.getComponent(ComponentDrawable.class))
 				.setContinuousAnimation(getCurrentAnimation());
-		if (isMoving())
-			((ComponentSpacial) entity.getComponent("spacial")).moveBy(moveVector.copy().scale(
-					(float)delta / 1000));
+		if (this.getIsMoving())
+			((ComponentSpacial) entity.getComponent(ComponentSpacial.class)).moveBy(moveVector.copy().scale(
+					(float) delta / 1000));
 		moveVector = new Vector2f();
 	}
 
@@ -144,38 +138,38 @@ public class ComponentCharacter extends EntityComponent {
 	public void setMoveVector(Vector2f moveVector) {
 		this.moveVector = moveVector;
 	}
-	public void setMoveSpeed(float moveSpeed) {
-		this.moveSpeed = moveSpeed;
-	}
 	public float getMoveSpeed() {
 		return this.moveSpeed;
 	}
-	public void setDirection(double direction) {
-		this.direction = direction;
+	public void setMoveSpeed(float moveSpeed) {
+		this.moveSpeed = moveSpeed;
 	}
 	public double getDirection() {
 		return this.direction;
 	}
-	public boolean isMoving() {
+	public void setDirection(double direction) {
+		this.direction = direction;
+	}
+	public boolean getIsMoving() {
 		return moveVector.length() > STANDING_STILL;
 	}
 	private String getCurrentAnimation() {
 		if (337.5 <= direction || direction < 22.5)
-			return isMoving() ? animationMoveE : animationIdleE;
+			return this.getIsMoving() ? this.animationMoveE : this.animationIdleE;
 		if (22.5 <= this.direction && this.direction < 67.5)
-			return isMoving() ? animationMoveSE : animationIdleSE;
+			return this.getIsMoving() ? this.animationMoveSE : this.animationIdleSE;
 		if (67.5 <= this.direction && this.direction < 112.5)
-			return isMoving() ? animationMoveS : animationIdleS;
+			return this.getIsMoving() ? this.animationMoveS : this.animationIdleS;
 		if (112.5 <= this.direction && this.direction < 157.5)
-			return isMoving() ? animationMoveSW : animationIdleSW;
+			return this.getIsMoving() ? this.animationMoveSW : this.animationIdleSW;
 		if (157.5 <= this.direction && this.direction < 202.5)
-			return isMoving() ? animationMoveW : animationIdleW;
+			return this.getIsMoving() ? this.animationMoveW : this.animationIdleW;
 		if (202.5 <= this.direction && this.direction < 247.5)
-			return isMoving() ? animationMoveNW : animationIdleNW;
+			return this.getIsMoving() ? this.animationMoveNW : this.animationIdleNW;
 		if (247.5 <= this.direction && this.direction < 292.5)
-			return isMoving() ? animationMoveN : animationIdleN;
+			return this.getIsMoving() ? this.animationMoveN : this.animationIdleN;
 		if (292.5 <= this.direction && this.direction < 337.5)
-			return isMoving() ? animationMoveNE : animationIdleNE;
+			return this.getIsMoving() ? this.animationMoveNE : this.animationIdleNE;
 		return "";
 	}
 
@@ -195,9 +189,17 @@ public class ComponentCharacter extends EntityComponent {
 		this.moveVector.normalise();
 		this.moveVector.scale(this.moveSpeed);
 	}
-
+	
+	// Utilities
 	@Override
 	public String toString() {
-		return this.getID() + ": moveSpeed-" + this.moveSpeed + " direction-" + this.direction + " movementVector-" + this.moveVector;
+		return this.getID() + ": moveSpeed-" + this.moveSpeed + " direction-" + this.direction
+				+ " movementVector-" + this.moveVector;
+	}
+	public static Set<Class<?>> getComponentDependencies() {
+		return new HashSet<Class<?>> ( Arrays.asList( new Class<?>[] {ComponentSpacial.class, ComponentDrawable.class }) );
+	}
+	public static Set<Class<?>> getComponentExclusives() {
+		return new HashSet<Class<?>>();
 	}
 }

@@ -1,21 +1,19 @@
 package frigengine.util;
 
-public abstract class IDable {
+public abstract class IDable<E> {
 	// Attributes
-	protected String id;
+	protected E id;
 
-	// Constructors and initialization
-	public String getID() {
+	// Getters and setters
+	public E getID() {
 		return id;
 	}
 
-	// Other methods
-	public boolean equals(IDable other) {
+	// Utilities
+	public boolean equals(IDable<E> other) {
 		return this.id.equals(other.id);
 	}
-
 	public static String iDFromPath(String contentPath) {
-		return contentPath.split("/")[contentPath.split("/").length - 1]
-				.split("\\.")[0];
+		return contentPath.split("/")[contentPath.split("/").length - 1].split("\\.")[0];
 	}
 }

@@ -8,8 +8,7 @@ public class AttributeFormatException extends DataParseException {
 	public String givenValue;
 
 	// Constructors and initialization
-	public AttributeFormatException(String element, String attribute,
-			String value) {
+	public AttributeFormatException(String element, String attribute, String value) {
 		super("Attribute '" + attribute + "' in XML element '" + element
 				+ "' was given invalid value '" + value + "'");
 		this.elementName = element;

@@ -12,9 +12,8 @@ import frigengine.exceptions.tests.IDableExceptionTest;
 import frigengine.exceptions.tests.InvalidTagExceptionTest;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ AttributeFormatExceptionTest.class,
-		AttributeMissingExceptionTest.class, CommandExceptionTest.class,
-		ComponentExceptionTest.class, DataParseExceptionTest.class,
+@Suite.SuiteClasses({ AttributeFormatExceptionTest.class, AttributeMissingExceptionTest.class,
+		CommandExceptionTest.class, ComponentExceptionTest.class, DataParseExceptionTest.class,
 		InvalidTagExceptionTest.class, IDableExceptionTest.class })
 public class ExceptionsTest {
 

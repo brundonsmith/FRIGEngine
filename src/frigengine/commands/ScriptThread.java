@@ -5,12 +5,14 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import frigengine.FRIGGame;
+import frigengine.exceptions.CommandArgumentParseException;
 
 public class ScriptThread implements Runnable {
-
+	// Attributes
 	private String[] args;
 	private Queue<CommandInstance> commands;
-	
+
+	// Constructors and initialization
 	ScriptThread() {
 		this.args = null;
 		this.commands = new LinkedList<CommandInstance>();
@@ -20,43 +22,42 @@ public class ScriptThread implements Runnable {
 	}
 	void addCommand(CommandInstance command) {
 		CommandInstance newCommand = new CommandInstance(command);
-		for(int i = 0; i < newCommand.getArguments().length; i++)
-			if(newCommand.getArgument(i).matches("\\$[0-9]+*"))
-				newCommand.setArgument(i, args[Integer.parseInt(newCommand.getArgument(i).substring(1))]);
-		commands.add(newCommand);
+		for (int i = 0; i < newCommand.getArguments().length; i++)
+			if (newCommand.getArgument(i).matches("\\$[0-9]+*"))
+				newCommand.setArgument(i,
+						args[Integer.parseInt(newCommand.getArgument(i).substring(1))]);
+		this.commands.add(newCommand);
 	}
-	
+
+	// Thread
 	@Override
 	public void run() {
-		while(!commands.isEmpty()) {
-			if(commands.peek().getCommandType() == CommandType.META_COMMAND) {
-				switch(commands.peek().getCommand()) {
+		while (!this.commands.isEmpty()) {
+			if (this.commands.peek().getCommandType() == CommandType.META_COMMAND) {
+				switch (this.commands.peek().getCommand()) {
 				case WAIT:
-					try {
-						wait(commands.peek().getArgument(0));
-					} catch (NumberFormatException e) {
-						
-					}
+					wait(this.commands.peek().getArgument(0));
 					break;
 				default:
 					break;
 				}
-			}
-			else
-				FRIGGame.getInstance().executeCommand(commands.peek());
-			
-			commands.remove();
+			} else
+				FRIGGame.getInstance().executeCommand(this.commands.peek());
+
+			this.commands.remove();
 		}
 	}
-	
 	private void wait(String seconds) {
+		float parsedSeconds;
 		try {
-			Thread.sleep((int)Math.round(Float.parseFloat(seconds) * 1000));
+			parsedSeconds = Float.parseFloat(seconds);
 		} catch (NumberFormatException e) {
-			//throw new CommandParseException();
+			throw new CommandArgumentParseException(Command.WAIT, 0, commands.peek().getArgument(0));
+		}
+		
+		try {
+			Thread.sleep((int) Math.round(parsedSeconds * 1000));
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package frigengine.entities;
 
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.util.xml.XMLElement;
 
 import frigengine.Initializable;
@@ -12,13 +12,7 @@ import frigengine.exceptions.InvalidTagException;
 import frigengine.scene.*;
 import frigengine.util.*;
 
-public class Entity extends Composable<EntityComponent> implements
-		Initializable {
-	@Override
-	public String getTagName() {
-		return "entity";
-	}
-
+public class Entity extends Composable<EntityComponent, String> implements Initializable {
 	// Attributes
 	private String name;
 
@@ -26,35 +20,34 @@ public class Entity extends Composable<EntityComponent> implements
 	public Entity(String id) {
 		this.id = id;
 	}
-
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals(getTagName()))
-			throw new InvalidTagException(getTagName(), xmlElement.getName());
+		if (!xmlElement.getName().equals(this.getClass().getSimpleName()))
+			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
 
-		// Assign attributes
+		// id
 		this.id = xmlElement.getAttribute("id", this.getID());
+		
+		// name
 		this.name = xmlElement.getAttribute("name", this.id);
 
-		// Load and initialize components
-		for (String componentTag : Component.getRegisteredComponents()) {
-			if (xmlElement.getChildrenByName(componentTag).size() > 1)
+		// components
+		for (Class<?> componentType : Component.getRegisteredComponents()) {
+			if (xmlElement.getChildrenByName(componentType.getName()).size() > 1)
 				throw new DataParseException("Entity '" + this.getID() + "' has more than one "
-						+ componentTag + " component defined");
-			if (xmlElement.getChildrenByName(componentTag).size() == 1) {
-				XMLElement componentElement = xmlElement.getChildrenByName(componentTag).get(0);
+						+ componentType.getName() + " component defined");
+			if (xmlElement.getChildrenByName(componentType.getSimpleName()).size() == 1) {
+				XMLElement componentElement = xmlElement.getChildrenByName(componentType.getSimpleName()).get(0);
 
 				EntityComponent newEntityComponent;
-				if (componentElement.getName().equals(ComponentSpacial.getComponentID()))
+				if (componentElement.getName().equals(ComponentSpacial.class.getSimpleName()))
 					newEntityComponent = new ComponentSpacial(this);
-				else if (componentElement.getName().equals(ComponentDrawable.getComponentID()))
+				else if (componentElement.getName().equals(ComponentDrawable.class.getSimpleName()))
 					newEntityComponent = new ComponentDrawable(this);
-				else if (componentElement.getName().equals(ComponentPhysical.getComponentID()))
+				else if (componentElement.getName().equals(ComponentPhysical.class.getSimpleName()))
 					newEntityComponent = new ComponentPhysical(this);
-				else if (componentElement.getName().equals(ComponentCharacter.getComponentID()))
+				else if (componentElement.getName().equals(ComponentCharacter.class.getSimpleName()))
 					newEntityComponent = new ComponentCharacter(this);
-				else if (componentElement.getName().equals(ComponentBattle.getComponentID()))
-					newEntityComponent = new ComponentBattle(this);
-				else if (componentElement.getName().equals(ComponentScriptable.getComponentID()))
+				else if (componentElement.getName().equals(ComponentScriptable.class.getSimpleName()))
 					newEntityComponent = new ComponentScriptable(this);
 				else
 					throw new InvalidTagException("valid component name",
@@ -68,15 +61,13 @@ public class Entity extends Composable<EntityComponent> implements
 	}
 
 	// Main loop methods
-	public void update(GameContainer container, int delta, Scene scene) {
+	public void update(int delta, Input input, Scene scene) {
 		for (Component component : this)
-			((EntityComponent) component).update(container, delta, scene);
+			((EntityComponent) component).update(delta, input, scene);
 	}
-
-	public void render(GameContainer container, Graphics g, Scene scene) {
-		if (this.hasComponent("drawable"))
-			((ComponentDrawable) getComponent("drawable")).render(container, g,
-					scene);
+	public void render(Graphics g, Scene scene) {
+		if (this.hasComponent(ComponentDrawable.class))
+			((ComponentDrawable) getComponent(ComponentDrawable.class)).render(g, scene);
 	}
 
 	// Getters and setters
@@ -86,20 +77,18 @@ public class Entity extends Composable<EntityComponent> implements
 
 	// Commands
 	public void executeCommand(CommandInstance command) {
-		if (this.hasComponent("scriptable"))
-			((ComponentScriptable) getComponent("scriptable"))
-					.executeCommand(command);
+		if (this.hasComponent(ComponentScriptable.class))
+			((ComponentScriptable) this.getComponent(ComponentScriptable.class)).executeCommand(command);
 		else
-			throw new CommandException(
-					"Entity '"
-							+ this.getID()
-							+ "' cannot execute command because it does not have a scriptable component");
+			throw new CommandException("Entity '" + this.getID()
+					+ "' cannot execute command because it does not have a scriptable component");
 	}
-	
+
+	// Utilities
 	@Override
 	public String toString() {
 		String result = this.getID() + ": {\n";
-		for(Component c : this) {
+		for (Component c : this) {
 			result += "\t" + c.toString() + "\n";
 		}
 		return result + "}";

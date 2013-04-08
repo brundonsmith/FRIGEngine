@@ -1,7 +1,11 @@
 package frigengine.entities;
 
-import org.newdawn.slick.GameContainer;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
@@ -9,162 +13,173 @@ import org.newdawn.slick.util.xml.XMLElement;
 import frigengine.FRIGAnimation;
 import frigengine.exceptions.AttributeFormatException;
 import frigengine.exceptions.ComponentException;
-import frigengine.exceptions.DataParseException;
+import frigengine.exceptions.InvalidTagException;
 import frigengine.scene.*;
 import frigengine.util.*;
 
 public class ComponentDrawable extends EntityComponent {
-	public static String getComponentID() {
-		return "drawable";
-	}
-
-	public String getTagName() {
-		return getComponentID();
-	}
-
-	public static String[] getComponentDependencies() {
-		return new String[] { "spacial" };
-	}
-
-	public static String[] getComponentExclusives() {
-		return new String[] {};
-	}
-
 	// Attributes
-	private String activeAnimation = "";
-	private String continuousAnimation = "";
-	private IDableCollection<FRIGAnimation> animations;
 	private Rectangle presence;
+	private IDableCollection<String, FRIGAnimation> animations;
+	private String activeAnimation;
+	private String continuousAnimation;
 
 	// Constructors and initialization
 	public ComponentDrawable(Entity entity) {
 		super(entity);
-		this.id = getComponentID();
 	}
-
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals(this.getID()))
-			throw new DataParseException(
-					"Xml node does not match component type '" + this.id + "'");
+		if (!xmlElement.getName().equals(this.getClass().getSimpleName()))
+			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
 
-		// Attributes
+		// presence
 		float presenceWidth;
 		try {
 			presenceWidth = (float) xmlElement.getDoubleAttribute("width", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "width",
+			throw new AttributeFormatException(xmlElement.getName(), "width",
 					xmlElement.getAttribute("width"));
 		}
 		float presenceHeight;
 		try {
 			presenceHeight = (float) xmlElement.getDoubleAttribute("height", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(this.getTagName(), "height",
+			throw new AttributeFormatException(xmlElement.getName(), "height",
 					xmlElement.getAttribute("height"));
 		}
-		presence = new Rectangle(0,0,0,0);
-		presence.setX(0);
-		presence.setY(0);
-		presence.setWidth(presenceWidth);
-		presence.setHeight(presenceHeight);
-		
-		if ((int) presence.getWidth() == 0 || (int) presence.getHeight() == 0)
-			presence = null;
+		this.presence = new Rectangle(0, 0, 0, 0);
+		this.presence.setX(0);
+		this.presence.setY(0);
+		this.presence.setWidth(presenceWidth);
+		this.presence.setHeight(presenceHeight);
+		if ((int) this.presence.getWidth() == 0 || (int) this.presence.getHeight() == 0)
+			this.presence = null;
 
-		// Animations
-		this.animations = new IDableCollection<FRIGAnimation>();
-		for (int i = 0; i < xmlElement.getChildrenByName("animation").size(); i++) {
-			XMLElement child = xmlElement.getChildrenByName("animation").get(i);
+		// animations
+		this.animations = new IDableCollection<String, FRIGAnimation>();
+		for (int i = 0; i < xmlElement.getChildrenByName(FRIGAnimation.class.getSimpleName()).size(); i++) {
+			XMLElement child = xmlElement.getChildrenByName(FRIGAnimation.class.getSimpleName()).get(i);
 
 			FRIGAnimation newAnimation = new FRIGAnimation();
 			newAnimation.init(child);
-			animations.add(newAnimation);
+			this.animations.add(newAnimation);
 		}
+		
+		// activeAnimation
+		this.activeAnimation = "";
+		
+		// continuousAnimation
+		this.continuousAnimation = "";
 	}
 
 	// Main loop methods
 	@Override
-	public void update(GameContainer container, int delta, Scene scene) {
-		if (getActiveAnimation() != null && getActiveAnimation().isStopped())
+	public void update(int delta, Input input, Scene scene) {
+		if (this.getActiveAnimation() != null && this.getActiveAnimation().isStopped())
 			this.activeAnimation = "";
-		getCurrentAnimation().update(delta);
+		this.getCurrentAnimation().update(delta);
 	}
-
-	public void render(GameContainer container, Graphics g, Scene scene) {
-		if(presence == null)
-			scene.renderObject(container, g, getCurrentAnimation(), new Rectangle(
-					((ComponentSpacial) entity.getComponent("spacial")).getX()
-							+ getCurrentAnimation().getPresence().getX() - getCurrentAnimation().getPresence().getWidth() / 2,
-					((ComponentSpacial) entity.getComponent("spacial")).getY()
-							+ getCurrentAnimation().getPresence().getY() - getCurrentAnimation().getPresence().getHeight() / 2,
-					getCurrentAnimation().getPresence().getWidth(),
-					getCurrentAnimation().getPresence().getHeight()));
-		else
-			scene.renderObject(container, g, getCurrentAnimation(), new Rectangle(
-					((ComponentSpacial) entity.getComponent("spacial")).getX()
-							+ presence.getX() - presence.getWidth() / 2,
-					((ComponentSpacial) entity.getComponent("spacial")).getY()
-							+ presence.getY() - presence.getHeight() / 2,
-					presence.getWidth(),
-					presence.getHeight()));
+	public void render(Graphics g, Scene scene) {
+		scene.renderObject(g, getCurrentAnimation(), new Rectangle(
+				this.getMinX(),
+				this.getMinY(),
+				this.getCurrentWidth(),
+				this.getCurrentHeight()));
 	}
 
 	// Getters and setters
+	public float getMinX() {
+		if (this.presence == null)
+			return ((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)).getX()
+					+ this.getCurrentAnimation().getPresence().getX()
+					- this.getCurrentAnimation().getPresence().getWidth() / 2;
+		else
+			return ((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)).getX()
+					+ this.presence.getX() - this.presence.getWidth() / 2;
+	}
+	public float getMinY() {
+		if (this.presence == null)
+			return ((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)).getY()
+					+ this.getCurrentAnimation().getPresence().getY()
+					- this.getCurrentAnimation().getPresence().getHeight() / 2;
+		else
+			return ((ComponentSpacial) this.entity.getComponent(ComponentSpacial.class)).getY()
+					+ this.presence.getY() - this.presence.getHeight() / 2;
+	}
+	public float getMaxX() {
+		return this.getMinX() + this.getCurrentWidth();
+	}
+	public float getMaxY() {
+		return this.getMinY() + this.getCurrentHeight();
+	}
+	public float getCurrentWidth() {
+		if (this.presence == null)
+			return this.getCurrentAnimation().getPresence().getWidth();
+		else
+			return this.presence.getWidth();
+	}
+	public float getCurrentHeight() {
+		if (this.presence == null)
+			return this.getCurrentAnimation().getPresence().getHeight();
+		else
+			return this.presence.getHeight();
+	}
+	public Rectangle getWorldPresence() {
+		return new Rectangle(this.getMinX(), this.getMinY(), this.getCurrentWidth(), this.getCurrentHeight());
+	}
 	public FRIGAnimation getCurrentAnimation() {
-		return activeAnimation.equals("") ? getContinuousAnimation()
-				: getActiveAnimation();
+		return this.activeAnimation.equals("") ? this.getContinuousAnimation() : this.getActiveAnimation();
 	}
-
 	public String getCurrentAnimationID() {
-		return activeAnimation.equals("") ? continuousAnimation
-				: activeAnimation;
+		return this.activeAnimation.equals("") ? this.continuousAnimation : this.activeAnimation;
 	}
-
 	public void setActiveAnimation(String animation) {
-		activeAnimation = animation;
-		getActiveAnimation().setLooping(false);
-		getActiveAnimation().restart();
+		this.activeAnimation = animation;
+		this.getActiveAnimation().setLooping(false);
+		this.getActiveAnimation().restart();
 	}
-
 	public FRIGAnimation getActiveAnimation() {
-		if (animations.contains(activeAnimation))
-			return animations.get(activeAnimation);
+		if (this.animations.contains(activeAnimation))
+			return this.animations.get(activeAnimation);
 		return null;
 	}
-
 	public String getActiveAnimationID() {
-		return activeAnimation;
+		return this.activeAnimation;
 	}
-
 	public void setContinuousAnimation(String animation) {
-		activeAnimation = "";
-		if (!continuousAnimation.equals(animation)) {
-			continuousAnimation = animation;
-			if (getContinuousAnimation() == null)
-				throw new ComponentException("Drawable component in entity '" + entity.getID()
+		this.activeAnimation = "";
+		if (!this.continuousAnimation.equals(animation)) {
+			this.continuousAnimation = animation;
+			if (this.getContinuousAnimation() == null)
+				throw new ComponentException("Drawable component in entity '" + this.entity.getID()
 						+ "' doesn't contain animation '" + animation + "'");
-			getContinuousAnimation().setLooping(true);
-			getContinuousAnimation().start();
+			this.getContinuousAnimation().setLooping(true);
+			this.getContinuousAnimation().start();
 		}
 	}
-
 	public FRIGAnimation getContinuousAnimation() {
-		if(animations.size() == 0)
+		if (this.animations.size() == 0)
 			return FRIGAnimation.getPlaceholder();
-		if (continuousAnimation.equals(""))
-			for(FRIGAnimation a : animations)
+		if (this.continuousAnimation.equals(""))
+			for (FRIGAnimation a : this.animations)
 				return a;
-		if (animations.contains(continuousAnimation))
-			return animations.get(continuousAnimation);
+		if (this.animations.contains(this.continuousAnimation))
+			return this.animations.get(this.continuousAnimation);
 		return FRIGAnimation.getPlaceholder();
 	}
-
 	public String getContinuousAnimationID() {
-		return continuousAnimation;
+		return this.continuousAnimation;
 	}
-
+	
+	// Utilities
 	@Override
 	public String toString() {
-		return this.getID() + ": " + getCurrentAnimation().getPresence();
+		return this.getID() + ": " + this.getCurrentAnimation().getPresence();
+	}
+	public static Set<Class<?>> getComponentDependencies() {
+		return new HashSet<Class<?>>( Arrays.asList(new Class<?>[] {ComponentSpacial.class} ) );
+	}
+	public static Set<Class<?>> getComponentExclusives() {
+		return new HashSet<Class<?>>();
 	}
 }

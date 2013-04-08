@@ -6,52 +6,46 @@ import java.util.Hashtable;
 
 import frigengine.exceptions.IDableException;
 
-public class IDableCollection<E extends IDable> implements Iterable<E> {
+public class IDableCollection<K, V extends IDable<K>> implements Iterable<V> {
 	// Attributes
-	private Map<String, E> items;
+	private Map<K, V> items;
 
 	// Constructors and initialization
 	public IDableCollection() {
-		this.items = new Hashtable<String, E>();
+		this.items = new Hashtable<K, V>();
 	}
 
-	// Other methods
-	public void add(E idable) throws IDableException {
-		if (items.get(idable.getID()) == null)
+	// Collection methods
+	public void add(V idable) throws IDableException {
+		if (this.items.get(idable.getID()) == null)
 			this.items.put(idable.getID(), idable);
 		else
 			throw new IDableException("Object with ID '" + idable.getID()
 					+ "' already exists in the collection");
 	}
-
-	public E get(String id) {
-		if (items.get(id) != null)
-			return items.get(id);
+	public void remove(K id) {
+		this.items.remove(id);
+	}
+	public boolean contains(K id) {
+		if (id != null) {
+			return this.items.containsKey(id);
+		}
+		return false;
+	}
+	public V get(K id) {
+		if (this.contains(id))
+			return this.items.get(id);
 		else
 			throw new IDableException("Object with ID '" + id
 					+ "' does not exist in the collection");
 	}
-
-	public boolean contains(String id) {
-		if (id != null) {
-			return items.containsKey(id);
-		}
-		return false;
-	}
-
 	public boolean isEmpty() {
-		return items.isEmpty();
+		return this.items.isEmpty();
 	}
-
-	public Iterator<E> iterator() {
-		return items.values().iterator();
+	public Iterator<V> iterator() {
+		return this.items.values().iterator();
 	}
-
-	public void remove(String id) {
-		items.remove(id);
-	}
-
 	public int size() {
-		return items.size();
+		return this.items.size();
 	}
 }

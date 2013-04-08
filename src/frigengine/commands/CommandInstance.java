@@ -17,35 +17,30 @@ public class CommandInstance {
 		this.arguments = arguments;
 	}
 	public CommandInstance(CommandInstance other) {
-	    this.command = other.command;
-	    this.arguments = Arrays.copyOf(other.arguments, other.arguments.length);
-	}
-
-	public static CommandInstance parseCommand(String line) {
-		return new CommandInstance(line.split("(")[0],
-				line.split("(")[1].split(")")[0].replace(" ", "")
-						.replace("\t", "").split(","));
+		this.command = other.command;
+		this.arguments = Arrays.copyOf(other.arguments, other.arguments.length);
 	}
 
 	// Getters and setters
 	public Command getCommand() {
-		return command;
+		return this.command;
 	}
 	public CommandType getCommandType() {
-		return command.getType();
+		return this.command.getType();
 	}
 	public String getArgument(int index) {
-		return arguments[index];
+		return this.arguments[index];
 	}
 	public void setArgument(int index, String value) {
-		arguments[index] = value;
+		this.arguments[index] = value;
 	}
 	public String[] getArguments() {
-		return Arrays.copyOf(arguments, arguments.length);
+		return Arrays.copyOf(this.arguments, this.arguments.length);
 	}
 
-	// Other methods
-	public void execute() {
-
+	// Utilities
+	public static CommandInstance parseCommand(String line) {
+		return new CommandInstance(line.split("(")[0].toUpperCase(),
+				line.split("(")[1].split(")")[0].replace(" ", "").replace("\t", "").split(","));
 	}
 }

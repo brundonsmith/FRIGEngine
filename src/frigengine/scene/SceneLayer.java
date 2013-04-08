@@ -1,7 +1,7 @@
 package frigengine.scene;
 
-import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
@@ -11,10 +11,6 @@ import frigengine.exceptions.AttributeFormatException;
 import frigengine.exceptions.InvalidTagException;
 
 public class SceneLayer implements Comparable<SceneLayer>, Initializable {
-	@Override
-	public String getTagName() {
-		return "layer";
-	}
 
 	// Attributes
 	private int depth;
@@ -24,33 +20,36 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 	// Constructors and initialization
 	@Override
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals(getTagName()))
-			throw new InvalidTagException(getTagName(), xmlElement.getName());
+		if (!xmlElement.getName().equals(this.getClass().getSimpleName()))
+			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
 
+		// depth
 		try {
 			this.depth = xmlElement.getIntAttribute("depth", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "depth",
+			throw new AttributeFormatException(xmlElement.getName(), "depth",
 					xmlElement.getAttribute("depth"));
 		}
+		
+		// priority
 		try {
 			this.priority = xmlElement.getIntAttribute("priority", 0);
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(getTagName(), "priority",
+			throw new AttributeFormatException(xmlElement.getName(), "priority",
 					xmlElement.getAttribute("priority"));
 		}
-
+		
+		// animation
 		animation = new FRIGAnimation();
-		animation.init(xmlElement.getChildrenByName("animation").get(0));
+		animation.init(xmlElement.getChildrenByName(FRIGAnimation.class.getSimpleName()).get(0));
 	}
 
 	// Main loop methods
-	public void update(GameContainer container, int delta, Scene scene) {
-		animation.update(delta);
+	public void update(int delta, Input input, Scene scene) {
+		this.animation.update(delta);
 	}
-
-	public void render(GameContainer container, Graphics g, Scene scene) {
-		scene.renderLayer(container, g, this.animation, this.depth);
+	public void render(Graphics g, Scene scene) {
+		scene.renderLayer(g, this.animation, this.depth);
 	}
 
 	// Getters and setters
@@ -61,16 +60,15 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 		return priority;
 	}
 
-	// Other methods
+	// Utilities
+	@Override
+	public String toString() {
+		return "layer: depth-" + this.getDepth() + " priority-" + this.getPriority();
+	}
 	@Override
 	public int compareTo(SceneLayer other) {
 		if (this.depth != other.depth)
 			return this.depth - other.depth;
 		return this.priority - other.priority;
-	}
-	
-	@Override
-	public String toString() {
-		return "layer: depth-" + this.getDepth() + " priority-" + this.getPriority();
 	}
 }

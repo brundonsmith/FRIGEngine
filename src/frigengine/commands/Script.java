@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 import frigengine.util.IDable;
 
-public class Script extends IDable {
+public class Script extends IDable<String> {
 	// Attributes
 	private ArrayList<CommandInstance> commands;
 
@@ -19,15 +19,19 @@ public class Script extends IDable {
 
 		Scanner scriptScanner = new Scanner(new File(scriptPath));
 
-		commands = new ArrayList<CommandInstance>();
-		while (scriptScanner.hasNext())
-			commands.add(CommandInstance.parseCommand(scriptScanner.nextLine()));
+		this.commands = new ArrayList<CommandInstance>();
+		while (scriptScanner.hasNextLine())
+			this.commands.add(CommandInstance.parseCommand(scriptScanner.nextLine()));
 
 		scriptScanner.close();
 	}
-
-	// Other methods
 	public ScriptThread getInstance(String[] args) {
-		return null;
+		ScriptThread instance = new ScriptThread();
+
+		instance.setArguments(args);
+		for (CommandInstance c : this.commands)
+			instance.addCommand(c);
+
+		return instance;
 	}
 }

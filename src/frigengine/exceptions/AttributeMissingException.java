@@ -8,8 +8,8 @@ public class AttributeMissingException extends DataParseException {
 
 	// COnstructors and initialization
 	public AttributeMissingException(String elementName, String attribute) {
-		super("Attribute '" + attribute + "' is required in element '"
-				+ elementName + "', but wasn't found");
+		super("Attribute '" + attribute + "' is required in element '" + elementName
+				+ "', but wasn't found");
 		this.elementName = elementName;
 		this.attributeName = attribute;
 	}
