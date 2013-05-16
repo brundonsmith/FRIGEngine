@@ -14,29 +14,34 @@ public abstract class EntityComponent extends Component implements Initializable
 	public EntityComponent(Entity entity) {
 		this.entity = entity;
 	}
+	
+	// Getters and setters
+	public Entity getEntity() {
+		return this.entity;
+	}
 
 	// Main loop methods
 	public abstract void update(int delta, Input input, Scene scene);
 	
 	// Utilities
 	public static void registerComponents() {
-		Component.registerComponent(ComponentSpacial.class,
-				ComponentSpacial.getComponentDependencies(),
-				ComponentSpacial.getComponentExclusives());
-		Component.registerComponent(ComponentDrawable.class,
-				ComponentDrawable.getComponentDependencies(),
-				ComponentDrawable.getComponentExclusives());
-		Component.registerComponent(ComponentPhysical.class,
-				ComponentPhysical.getComponentDependencies(),
-				ComponentPhysical.getComponentExclusives());
-		Component.registerComponent(ComponentCharacter.class,
-				ComponentCharacter.getComponentDependencies(),
-				ComponentCharacter.getComponentExclusives());
-		Component.registerComponent(ComponentScriptable.class,
-				ComponentScriptable.getComponentDependencies(),
-				ComponentScriptable.getComponentExclusives());
-		Component.registerComponent(ComponentBattle.class,
-				ComponentBattle.getComponentDependencies(),
-				ComponentBattle.getComponentExclusives());
+		Component.registerComponent(SpacialComponent.class,
+				SpacialComponent.getComponentDependencies(),
+				SpacialComponent.getComponentExclusives());
+		Component.registerComponent(DrawableComponent.class,
+				DrawableComponent.getComponentDependencies(),
+				DrawableComponent.getComponentExclusives());
+		Component.registerComponent(PhysicalComponent.class,
+				PhysicalComponent.getComponentDependencies(),
+				PhysicalComponent.getComponentExclusives());
+		Component.registerComponent(CharacterComponent.class,
+				CharacterComponent.getComponentDependencies(),
+				CharacterComponent.getComponentExclusives());
+		Component.registerComponent(ScriptableComponent.class,
+				ScriptableComponent.getComponentDependencies(),
+				ScriptableComponent.getComponentExclusives());
+		Component.registerComponent(BattleComponent.class,
+				BattleComponent.getComponentDependencies(),
+				BattleComponent.getComponentExclusives());
 	}
 }

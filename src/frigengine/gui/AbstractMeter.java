@@ -1,12 +1,16 @@
 package frigengine.gui;
 
+import frigengine.scene.Scene;
+
 public abstract class AbstractMeter extends GUIFrame {
 	// Attributes
 	protected int value;
 	protected int capacity;
 	
 	// Constructors and initialization
-	public AbstractMeter(int capacity) {
+	public AbstractMeter(Scene context, int capacity) {
+		super(context);
+		
 		this.value = 0;
 		this.capacity = capacity;
 	}

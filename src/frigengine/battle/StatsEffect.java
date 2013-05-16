@@ -1,6 +1,6 @@
 package frigengine.battle;
 
-import frigengine.entities.ComponentBattle;
+import frigengine.entities.BattleComponent;
 
 public enum StatsEffect {
 	POISON(10, 0, 0, 0, 0);
@@ -39,7 +39,7 @@ public enum StatsEffect {
 	}
 
 	// Application
-	public void applyOn(ComponentBattle target) {
+	public void applyOn(BattleComponent target) {
 		target.damageHealth(this.healthChange);
 		target.damageMagic(this.magicChange);
 	}

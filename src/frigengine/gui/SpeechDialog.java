@@ -13,8 +13,8 @@ import frigengine.scene.Scene;
 public class SpeechDialog extends AbstractDialog {
 
 	// Constructors and initialization
-	public SpeechDialog(String content) {
-		super(content);
+	public SpeechDialog(Scene context, String content) {
+		super(context, content);
 		
 		this.presence = new Rectangle(
 				0,
@@ -30,8 +30,8 @@ public class SpeechDialog extends AbstractDialog {
 		
 		this.setContent(content);
 	}
-	public SpeechDialog(ArrayList<String> pages) {
-		super(pages);
+	public SpeechDialog(Scene context, ArrayList<String> pages) {
+		super(context, pages);
 
 		this.presence = new Rectangle(
 				0,

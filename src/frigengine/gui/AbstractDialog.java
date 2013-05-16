@@ -12,12 +12,11 @@ public abstract class AbstractDialog extends GUIFrame {
 	protected Queue<String> pages;
 
 	// Constructors and initialization
-	public AbstractDialog(String content) {
-		super();
-		
+	public AbstractDialog(Scene context, String content) {
+		super(context);
 	}
-	public AbstractDialog(List<String> content) {
-		super();
+	public AbstractDialog(Scene context, List<String> content) {
+		super(context);
 		
 		// pages
 		this.pages = new LinkedList<String>();

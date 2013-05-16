@@ -1,8 +1,9 @@
 package frigengine.gui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import frigengine.scene.Scene;
 
 public abstract class AbstractLinearMenu extends GUIFrame {
 	// Attributes
@@ -10,34 +11,36 @@ public abstract class AbstractLinearMenu extends GUIFrame {
 	protected int selectedIndex;
 	protected boolean isWrapping;
 	protected boolean isVertical;
+	protected List<MenuSelectListener> selectListeners;
 	
 	// Constructors and initialization
-	public AbstractLinearMenu() {
-		super();
+	public AbstractLinearMenu(Scene context) {
+		super(context);
 		
-		this.items = null;
+		// items
+		this.items = new ArrayList<MenuItem>();
+		
+		// selectedIndex
 		this.selectedIndex = 0;
+		
+		// isWrapping
 		this.isWrapping = true;
+		
+		// isVertical
 		this.isVertical = true;
+		
+		// selectListeners
+		this.selectListeners = new ArrayList<MenuSelectListener>();
 	}
 	
 	// Getters and setters
-	public MenuItem[] getMenuItems() {
-		MenuItem[] items = new MenuItem[this.items.size()];
-		for(int i = 0; i < items.length; i++)
-			items[i] = this.items.get(i);
-		return items;
-	}
-	public void setMenuItems(MenuItem[] items) {
-		this.items = Arrays.asList(items);
-	}
 	public int getNumItems() {
 		return this.items == null ? 0 : this.items.size();
 	}
-	public void addMenuItem(MenuItem item) {
-		if(this.items == null)
-			this.items = new ArrayList<MenuItem>();
-		
+	public List<MenuItem> getItems() {
+		return items;
+	}
+	public void addItem(MenuItem item) {
 		this.items.add(item);
 	}
 	public MenuItem	getSelection() {
@@ -75,5 +78,20 @@ public abstract class AbstractLinearMenu extends GUIFrame {
 				while(this.selectedIndex < 0)
 					this.selectedIndex++;
 		}
+	}
+	public void select() {
+		for(MenuSelectListener listener : selectListeners)
+			listener.itemSelected(this, this.getSelection());
+		this.close();
+	}
+	
+	// Events
+	public final void addSelectListener(MenuSelectListener listener) {
+		selectListeners.add(listener);
+	}
+	protected final void selectItem(MenuItem selected) {
+		for(MenuSelectListener listener : this.selectListeners)
+			listener.itemSelected(this, selected);
+		this.close();
 	}
 }

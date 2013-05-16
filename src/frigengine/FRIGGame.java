@@ -21,6 +21,8 @@ import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 import org.newdawn.slick.util.xml.XMLParser;
 
+import frigengine.battle.Battle;
+import frigengine.battle.BattleTemplate;
 import frigengine.commands.*;
 import frigengine.entities.*;
 import frigengine.exceptions.AttributeFormatException;

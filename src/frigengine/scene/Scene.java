@@ -4,18 +4,13 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Scanner;
-import java.util.Set;
 
-import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.geom.Line;
 import org.newdawn.slick.geom.Rectangle;
-import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
@@ -24,22 +19,18 @@ import frigengine.entities.*;
 import frigengine.exceptions.AttributeFormatException;
 import frigengine.exceptions.ComponentException;
 import frigengine.exceptions.DataParseException;
-import frigengine.graphics.BufferPool;
 import frigengine.gui.GUICloseListener;
 import frigengine.gui.GUIFrame;
-import frigengine.gui.SpeechDialog;
 import frigengine.util.*;
 
 public abstract class Scene extends IDable<String> implements GUICloseListener {
 	// Attributes
 	private Rectangle presence;
-	private Set<Shape> boundaries;
-	private String currentCamera = "camera_1";
+	private String currentCamera;
 	private IDableCollection<String, Camera> cameras;
-	private ArrayList<SceneLayer> layers;
-	private IDableCollection<String, Entity> entities;
-	private Deque<GUIFrame> guiStack;
-	private BufferPool bufferPool;
+	protected ArrayList<SceneLayer> layers;
+	protected IDableCollection<String, Entity> entities;
+	protected Deque<GUIFrame> guiStack;
 
 	// Constructors and initialization
 	public Scene(String id) {
@@ -70,12 +61,8 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 		this.presence.setWidth(width);
 		this.presence.setHeight(height);
 
-		// boundaries
-		this.boundaries = new HashSet<Shape>();
-		this.boundaries.add(new Line(this.getPresence().getMinX(), this.getPresence().getMinY(), this.getPresence().getMinX(), this.getPresence().getMaxY()));
-		this.boundaries.add(new Line(this.getPresence().getMinX(), this.getPresence().getMinY(), this.getPresence().getMaxX(), this.getPresence().getMinY()));
-		this.boundaries.add(new Line(this.getPresence().getMaxX(), this.getPresence().getMinY(), this.getPresence().getMaxX(), this.getPresence().getMaxY()));
-		this.boundaries.add(new Line(this.getPresence().getMinX(), this.getPresence().getMaxY(), this.getPresence().getMaxX(), this.getPresence().getMaxY()));
+		// currentCamera
+		this.currentCamera = xmlElement.getAttribute("default_camera", null);
 		
 		// cameras
 		this.cameras = new IDableCollection<String, Camera>();
@@ -111,11 +98,11 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 			this.addEntityToScene(entity.getID());
 
 			// Entity components
-			if (entity.hasComponent(ComponentSpacial.class)) {
+			if (entity.hasComponent(SpacialComponent.class)) {
 				float x;
 				try {
 					x = (float) child.getDoubleAttribute("x",
-							((ComponentSpacial) entity.getComponent(ComponentSpacial.class)).getX());
+							entity.spacial().getX());
 				} catch (SlickXMLException e) {
 					throw new AttributeFormatException("entity_reference", "x",
 							child.getAttribute("x"));
@@ -123,34 +110,29 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 				float y;
 				try {
 					y = (float) child.getDoubleAttribute("y",
-							((ComponentSpacial) entity.getComponent(ComponentSpacial.class)).getY());
+							entity.spacial().getY());
 				} catch (SlickXMLException e) {
 					throw new AttributeFormatException("entity_reference", "y",
 							child.getAttribute("y"));
 				}
 
-				((ComponentSpacial) entity.getComponent(ComponentSpacial.class)).moveTo(x, y);
+				entity.spacial().moveTo(x, y);
 			}
-			if (entity.hasComponent(ComponentDrawable.class)) {
-				((ComponentDrawable) entity.getComponent(ComponentDrawable.class)).setContinuousAnimation(child
-						.getAttribute("animation", ((ComponentDrawable) entity
-								.getComponent(ComponentDrawable.class)).getContinuousAnimationID()));
+			if (entity.hasComponent(DrawableComponent.class)) {
+				entity.drawable().setContinuousAnimation(child
+						.getAttribute("animation", entity.drawable().getContinuousAnimationID()));
 			}
-			if (entity.hasComponent(ComponentCharacter.class)) {
+			if (entity.hasComponent(CharacterComponent.class)) {
 				try {
-					((ComponentCharacter) entity.getComponent(ComponentCharacter.class))
-							.setMoveSpeed((float) child.getDoubleAttribute("speed",
-									((ComponentCharacter) entity.getComponent(ComponentCharacter.class))
-											.getMoveSpeed()));
+					entity.character().setMoveSpeed((float) child.getDoubleAttribute("speed",
+									entity.character().getMoveSpeed()));
 				} catch (SlickXMLException e) {
 					throw new AttributeFormatException("entity_reference", "speed",
 							child.getAttribute("speed"));
 				}
 				try {
-					((ComponentCharacter) entity.getComponent(ComponentCharacter.class))
-							.setDirection((float) child.getDoubleAttribute("direction",
-									((ComponentCharacter) entity.getComponent(ComponentCharacter.class))
-											.getDirection()));
+					entity.character().setDirection((float) child.getDoubleAttribute("direction",
+									entity.character().getDirection()));
 				} catch (SlickXMLException e) {
 					throw new AttributeFormatException("entity_reference", "direction",
 							child.getAttribute("direction"));
@@ -160,51 +142,10 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 
 		// guiStack
 		this.guiStack = new ArrayDeque<GUIFrame>();
-
-		// bufferPool
-		this.bufferPool = new BufferPool((int) this.presence.getWidth(),
-				(int) this.presence.getHeight(), 5);
 	}
 	
 	// Main loop methods
-	public void update(int delta, Input input) {
-		boolean timeBlocked = false;
-		boolean inputBlocked = false;
-		
-		//////////////////////////////////////////
-		// TEMPORARY
-		if(input.isKeyPressed(Keyboard.KEY_RSHIFT)) {
-			this.openGUI(new SpeechDialog("Hallo thar this is me speaking sup"));
-		}
-		if(input.isKeyDown(Keyboard.KEY_LSHIFT))
-			this.zoomCamera(0.99F);
-		if(input.isKeyDown(Keyboard.KEY_SPACE))
-			this.zoomCamera(1.01F);
-		//////////////////////////////////////////
-		
-		
-		// GUI
-		for (Object o : this.guiStack.toArray()) {
-			GUIFrame frame = (GUIFrame) o;
-			frame.update(timeBlocked ? 0 : delta, inputBlocked ? null : input);
-			if (frame.getBlocksTime())
-				timeBlocked = true;
-			if (frame.getBlocksInput())
-				inputBlocked = true;
-		}
-
-		// Layers
-		for (SceneLayer layer : this.layers)
-			layer.update(timeBlocked ? 0 : delta, inputBlocked ? null : input, this);
-
-		// Player
-		this.updatePlayer(timeBlocked ? 0 : delta, inputBlocked ? null : input);
-
-		// Entities
-		for (Entity entity : this.entities)
-			entity.update(timeBlocked ? 0 : delta, inputBlocked ? null : input, this);
-	}
-	protected abstract void updatePlayer(int delta, Input input);
+	public abstract void update(int delta, Input input);
 	public void render(Graphics g) {
 		for (SceneLayer layer : layers)
 			if (layer.getDepth() <= 0)
@@ -335,17 +276,13 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 	public Rectangle getPresence() {
 		return this.presence;
 	}
-	public Set<Shape> getBoundaries() {
-		return this.boundaries;
-	}
 	public Camera getCurrentCamera() {
-		return this.cameras.get(currentCamera);
+		if(this.currentCamera != null)
+			return this.cameras.get(currentCamera);
+		return this.cameras.iterator().next();
 	}
 	public IDableCollection<String, Entity> getEntities() {
 		return this.entities;
-	}
-	public BufferPool getBufferPool() {
-		return this.bufferPool;
 	}
 
 	// Commands

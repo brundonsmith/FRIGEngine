@@ -17,6 +17,7 @@ public abstract class GUIFrame {
 	private static final int DEFAULT_BORDER_VERTICAL = 30;
 	
 	// Attributes
+	protected Scene context;
 	protected UnicodeFont font;
 	protected FRIGAnimation background;
 	protected Rectangle presence;
@@ -27,24 +28,57 @@ public abstract class GUIFrame {
 	private ArrayList<GUICloseListener> guiCloseEventListeners;
 
 	// Constructors and initialization
-	public GUIFrame() {
+	public GUIFrame(Scene context) {
+		// context
+		this.context = context;
+		
+		// font
 		this.font = FRIGGame.getInstance().getDefaultFont();
+		
+		// background
 		this.background = FRIGGame.getInstance().getGuiAsset(this.getClass().getSimpleName());
+		
+		// presence
 		this.presence = null;
+		
+		// borderHorizontal
 		this.borderHorizontal = DEFAULT_BORDER_HORIZONTAL;
+		
+		// borderVertical
 		this.borderVertical = DEFAULT_BORDER_VERTICAL;
-		this.blocksTime = true;
-		this.blocksInput = true;
+		
+		// blocksTime
+		this.blocksTime = false;
+		
+		// blocksInput
+		this.blocksInput = false;
+		
+		// guiCloseEventListeners
 		this.guiCloseEventListeners = null;
 	}
 	public GUIFrame(GUIFrame source) {
+		// font
 		this.font = source.font;
+		
+		// background
 		this.background = source.background;
+		
+		// presence
 		this.presence = source.getPresence();
+		
+		// borderHorizontal
 		this.borderHorizontal = source.borderHorizontal;
+		
+		// borderVertical
 		this.borderVertical = source.borderVertical;
+		
+		// blocksTime
 		this.blocksTime = source.blocksTime;
+		
+		// blocksInput
 		this.blocksInput = source.blocksInput;
+		
+		// guiCloseEventListeners
 		this.guiCloseEventListeners = source.guiCloseEventListeners;
 	}
 	/*

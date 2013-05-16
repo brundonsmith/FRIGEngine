@@ -1,5 +1,8 @@
 package frigengine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Image;
@@ -20,6 +23,7 @@ public class FRIGAnimation extends IDable<String> implements Initializable {
 	// Attributes
 	private Animation animation;
 	private Rectangle presence;
+	private List<AnimationFinishedListener> finishedListeners;
 
 	// Constructors and initialization
 	public FRIGAnimation() {
@@ -106,6 +110,9 @@ public class FRIGAnimation extends IDable<String> implements Initializable {
 		presence.setY(offset_y);
 		presence.setWidth(width);
 		presence.setHeight(height);
+		
+		// finishedListeners
+		this.finishedListeners = new ArrayList<AnimationFinishedListener>();
 	}
 
 	// Getters and setters
@@ -227,6 +234,8 @@ public class FRIGAnimation extends IDable<String> implements Initializable {
 	}
 	public void update(long delta) {
 		this.animation.update(delta);
+		if(this.isStopped())
+			this.finish();
 	}
 	@SuppressWarnings("deprecation")
 	public void updateNoDraw() {
@@ -250,4 +259,12 @@ public class FRIGAnimation extends IDable<String> implements Initializable {
 		return placeholder;
 	}
 
+	// Events
+	public void addFinishedListener(AnimationFinishedListener listener) {
+		this.finishedListeners.add(listener);
+	}
+	private void finish() {
+		for(AnimationFinishedListener listener : finishedListeners)
+			listener.animationFinished(this);
+	}
 }

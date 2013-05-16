@@ -39,16 +39,18 @@ public class Entity extends Composable<EntityComponent, String> implements Initi
 				XMLElement componentElement = xmlElement.getChildrenByName(componentType.getSimpleName()).get(0);
 
 				EntityComponent newEntityComponent;
-				if (componentElement.getName().equals(ComponentSpacial.class.getSimpleName()))
-					newEntityComponent = new ComponentSpacial(this);
-				else if (componentElement.getName().equals(ComponentDrawable.class.getSimpleName()))
-					newEntityComponent = new ComponentDrawable(this);
-				else if (componentElement.getName().equals(ComponentPhysical.class.getSimpleName()))
-					newEntityComponent = new ComponentPhysical(this);
-				else if (componentElement.getName().equals(ComponentCharacter.class.getSimpleName()))
-					newEntityComponent = new ComponentCharacter(this);
-				else if (componentElement.getName().equals(ComponentScriptable.class.getSimpleName()))
-					newEntityComponent = new ComponentScriptable(this);
+				if (componentElement.getName().equals(SpacialComponent.class.getSimpleName()))
+					newEntityComponent = new SpacialComponent(this);
+				else if (componentElement.getName().equals(DrawableComponent.class.getSimpleName()))
+					newEntityComponent = new DrawableComponent(this);
+				else if (componentElement.getName().equals(PhysicalComponent.class.getSimpleName()))
+					newEntityComponent = new PhysicalComponent(this);
+				else if (componentElement.getName().equals(CharacterComponent.class.getSimpleName()))
+					newEntityComponent = new CharacterComponent(this);
+				else if (componentElement.getName().equals(BattleComponent.class.getSimpleName()))
+					newEntityComponent = new BattleComponent(this);
+				else if (componentElement.getName().equals(ScriptableComponent.class.getSimpleName()))
+					newEntityComponent = new ScriptableComponent(this);
 				else
 					throw new InvalidTagException("valid component name",
 							componentElement.getName());
@@ -66,19 +68,39 @@ public class Entity extends Composable<EntityComponent, String> implements Initi
 			((EntityComponent) component).update(delta, input, scene);
 	}
 	public void render(Graphics g, Scene scene) {
-		if (this.hasComponent(ComponentDrawable.class))
-			((ComponentDrawable) getComponent(ComponentDrawable.class)).render(g, scene);
+		if (this.hasComponent(DrawableComponent.class))
+			this.drawable().render(g, scene);
 	}
 
 	// Getters and setters
 	public String getName() {
 		return name;
 	}
-
+	
+	// Get components
+	public SpacialComponent spacial() {
+		return (SpacialComponent)this.getComponent(SpacialComponent.class);
+	}
+	public DrawableComponent drawable() {
+		return (DrawableComponent)this.getComponent(DrawableComponent.class);
+	}
+	public PhysicalComponent physics() {
+		return (PhysicalComponent)this.getComponent(PhysicalComponent.class);
+	}
+	public CharacterComponent character() {
+		return (CharacterComponent)this.getComponent(CharacterComponent.class);
+	}
+	public ScriptableComponent scriptable() {
+		return (ScriptableComponent)this.getComponent(ScriptableComponent.class);
+	}
+	public BattleComponent battleable() {
+		return (BattleComponent)this.getComponent(BattleComponent.class);
+	}
+	
 	// Commands
 	public void executeCommand(CommandInstance command) {
-		if (this.hasComponent(ComponentScriptable.class))
-			((ComponentScriptable) this.getComponent(ComponentScriptable.class)).executeCommand(command);
+		if (this.hasComponent(ScriptableComponent.class))
+			this.scriptable().executeCommand(command);
 		else
 			throw new CommandException("Entity '" + this.getID()
 					+ "' cannot execute command because it does not have a scriptable component");

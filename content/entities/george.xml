@@ -1,6 +1,6 @@
 <Entity name="Bob" >
-	<ComponentSpacial x="30" y="30"/>
-	<ComponentDrawable>
+	<SpacialComponent x="30" y="30"/>
+	<DrawableComponent>
 		<FRIGAnimation id="stand_nw" sprite="content/entities/player_1_idle_n.png" rows="1" cols="1" looping="true" spf="0.2" />
 		<FRIGAnimation id="stand_n" sprite="content/entities/player_1_idle_n.png" rows="1" cols="1" looping="true" spf="0.2" />
 		<FRIGAnimation id="stand_ne" sprite="content/entities/player_1_idle_n.png" rows="1" cols="1" looping="true" spf="0.2" />
@@ -18,8 +18,8 @@
 		<FRIGAnimation id="walk_se" sprite="content/entities/player_1_move_s.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<FRIGAnimation id="walk_e" sprite="content/entities/player_1_move_e.png" rows="1" cols="3" looping="true" spf="0.2" />
 		<FRIGAnimation id="walk_w" sprite="content/entities/player_1_move_w.png" rows="1" cols="3" looping="true" spf="0.2" />
-	</ComponentDrawable>
-	<ComponentCharacter speed="100">
+	</DrawableComponent>
+	<CharacterComponent speed="100">
 		<animation_idle_nw id="stand_nw"/>
 		<animation_idle_n id="stand_n"/>
 		<animation_idle_ne id="stand_ne"/>
@@ -37,8 +37,8 @@
 		<animation_move_se id="walk_se"/>
 		<animation_move_e id="walk_e"/>
 		<animation_move_w id="walk_w"/>
-	</ComponentCharacter>
-	<ComponentPhysical collidable="true" movable="true">
+	</CharacterComponent>
+	<PhysicalComponent collidable="true" movable="true">
 		<rectangle width="20" height="30" offset_x="0" offset_y="0"/>
-	</ComponentPhysical>
+	</PhysicalComponent>
 </Entity>

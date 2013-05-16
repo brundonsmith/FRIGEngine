@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Entity name="Box">
-	<ComponentSpacial x="100" y="100"></ComponentSpacial>
-	<ComponentDrawable x_offset="0" y_offset="0" width="40" height="40">
-		<FRIGAnimation id="box_animation_1" sprite="content/entities/box.png" rows="1" cols="1" looping="true" spf="1"/>
-	</ComponentDrawable>
-	<ComponentPhysical collidable="true" movable="false">
+	<SpacialComponent x="100" y="100"/>
+	<DrawableComponent x_offset="0" y_offset="0" width="40" height="40">
+		<FRIGAnimation id="box_animation_1" sprite="content/entities/animation.png" rows="2" cols="2" looping="true" spf="0.5"/>
+	</DrawableComponent>
+	<PhysicalComponent collidable="true" movable="false">
 		<rectangle width="40.0" height="40.0" offset_x="0.0" offset_y="0.0"/>
-	</ComponentPhysical>
+	</PhysicalComponent>
 </Entity>

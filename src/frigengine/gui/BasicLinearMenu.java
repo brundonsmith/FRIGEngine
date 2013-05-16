@@ -7,13 +7,16 @@ import org.newdawn.slick.geom.Rectangle;
 
 import frigengine.scene.Scene;
 
-public class BasicLinearMenu extends AbstractLinearMenu {
+public class BasicLinearMenu extends CompoundLinearMenu {
 	// Constructors and initialization
-	public BasicLinearMenu() {
-		super();
+	public BasicLinearMenu(Scene context) {
+		super(context);
 		
-		this.blocksInput = false;
+		// blocksTime
 		this.blocksTime = false;
+		
+		// blocksInput
+		this.blocksInput = false;
 	}
 	
 	// Main loop methods
@@ -23,10 +26,12 @@ public class BasicLinearMenu extends AbstractLinearMenu {
 			this.forward();
 		else if (input != null && input.isKeyPressed(Keyboard.KEY_UP))
 			this.back();
+		
+		if(input != null && input.isKeyPressed(Keyboard.KEY_RETURN))
+			this.select();
 	}
 	@Override
 	public void render(Graphics g, Scene scene) {
-		
 		this.background.draw( 
 				this.getPresence().getX(), 
 				this.getPresence().getY(), 
@@ -44,7 +49,20 @@ public class BasicLinearMenu extends AbstractLinearMenu {
 						itemHeight
 						);
 				
-				scene.renderStringBoxForeground(g, this.getMenuItems()[i].getLabel(), itemPresence, this.font);
+				scene.renderStringBoxForeground(g, this.items.get(i).getLabel(), itemPresence, this.font);
+			}
+		} else {
+			int itemWidth = (int)(this.getBorderedPresence().getHeight() / this.getNumItems());
+			
+			for(int i = 0; i < this.getNumItems(); i++) {
+				Rectangle itemPresence = new Rectangle(
+						this.getBorderedPresence().getMinX() + i * itemWidth,
+						this.getBorderedPresence().getMinY(),
+						itemWidth,
+						this.getBorderedPresence().getHeight()
+						);
+
+				scene.renderStringBoxForeground(g, this.items.get(i).getLabel(), itemPresence, this.font);
 			}
 		}
 	}
