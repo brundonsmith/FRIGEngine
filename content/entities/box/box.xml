@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Entity name="Box">
+	<PositionData/>
+	<GraphicsData x_offset="0" y_offset="0" width="40" height="40">
+		<Animation id="box_animation_1" sprite="content/entities/box/animation.png" rows="2" cols="2" looping="true" spf="0.5"/>
+	</GraphicsData>
+	<PhysicsData collidable="true" movable="false">
+		<Rectangle x="0.0" y="0.0" width="40.0" height="40.0"/>
+	</PhysicsData>
+</Entity>

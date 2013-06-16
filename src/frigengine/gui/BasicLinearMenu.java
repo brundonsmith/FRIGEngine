@@ -3,15 +3,13 @@ package frigengine.gui;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.geom.Rectangle;
 
-import frigengine.scene.Scene;
+import frigengine.Scene;
+import  frigengine.util.geom.Rectangle;
 
-public class BasicLinearMenu extends CompoundLinearMenu {
+public class BasicLinearMenu extends RecursiveLinearMenu {
 	// Constructors and initialization
-	public BasicLinearMenu(Scene context) {
-		super(context);
-		
+	public BasicLinearMenu() {
 		// blocksTime
 		this.blocksTime = false;
 		
@@ -22,13 +20,15 @@ public class BasicLinearMenu extends CompoundLinearMenu {
 	// Main loop methods
 	@Override
 	public void update(int delta, Input input) {
-		if (input != null && input.isKeyPressed(Keyboard.KEY_DOWN))
+		if (input != null && input.isKeyPressed(Keyboard.KEY_DOWN)) {
 			this.forward();
-		else if (input != null && input.isKeyPressed(Keyboard.KEY_UP))
+		} else if (input != null && input.isKeyPressed(Keyboard.KEY_UP)) {
 			this.back();
+		}
 		
-		if(input != null && input.isKeyPressed(Keyboard.KEY_RETURN))
+		if(input != null && input.isKeyPressed(Keyboard.KEY_RETURN)) {
 			this.select();
+		}
 	}
 	@Override
 	public void render(Graphics g, Scene scene) {
@@ -65,5 +65,9 @@ public class BasicLinearMenu extends CompoundLinearMenu {
 				scene.renderStringBoxForeground(g, this.items.get(i).getLabel(), itemPresence, this.font);
 			}
 		}
+	}
+	
+	// Events
+	public void guiClosed(GUIFrame source, MenuItem selection) {
 	}
 }

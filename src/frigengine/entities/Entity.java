@@ -1,118 +1,142 @@
 package frigengine.entities;
 
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
 import org.newdawn.slick.util.xml.XMLElement;
 
-import frigengine.Initializable;
-import frigengine.commands.*;
-import frigengine.exceptions.CommandException;
-import frigengine.exceptions.DataParseException;
-import frigengine.exceptions.InvalidTagException;
-import frigengine.scene.*;
-import frigengine.util.*;
+import frigengine.commands.CommandInstance;
+import frigengine.exceptions.data.InvalidTagException;
+import frigengine.util.IDable;
+import frigengine.util.IDableCollection;
+import frigengine.util.Initializable;
 
-public class Entity extends Composable<EntityComponent, String> implements Initializable {
+public class Entity extends IDable<String> implements Initializable {
+	// Constants
+	private static final Class<?>[] knownComponents = new Class<?>[]{
+		PositionData.class,
+		PhysicsData.class,
+		GraphicsData.class,
+		CharacterData.class,
+		BattleData.class
+	};
+	private static final Class<?>[] knownCategories = new Class<?>[] {
+		Positionable.class,
+		Physical.class,
+		Drawable.class,
+		Character.class,
+		Battleable.class
+	};
+	
 	// Attributes
 	private String name;
-
+	IDableCollection<Class<? extends Component>, Component> components;
+	private IDableCollection<Class<? extends Category>, Category> categories;
+	
 	// Constructors and initialization
 	public Entity(String id) {
 		this.id = id;
 	}
+	@Override
 	public void init(XMLElement xmlElement) {
-		if (!xmlElement.getName().equals(this.getClass().getSimpleName()))
+		// Check element name
+		if (!xmlElement.getName().equals(this.getClass().getSimpleName())) {
 			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
+		}
 
 		// id
-		this.id = xmlElement.getAttribute("id", this.getID());
+		this.id = xmlElement.getAttribute("id", this.getId());
 		
 		// name
 		this.name = xmlElement.getAttribute("name", this.id);
-
+		
 		// components
-		for (Class<?> componentType : Component.getRegisteredComponents()) {
-			if (xmlElement.getChildrenByName(componentType.getName()).size() > 1)
-				throw new DataParseException("Entity '" + this.getID() + "' has more than one "
-						+ componentType.getName() + " component defined");
-			if (xmlElement.getChildrenByName(componentType.getSimpleName()).size() == 1) {
+		this.components = new IDableCollection<Class<? extends Component>, Component>();
+		for (Class<?> componentType : knownComponents) {
+			if (xmlElement.getChildrenByName(componentType.getSimpleName()).size() >= 1) {
 				XMLElement componentElement = xmlElement.getChildrenByName(componentType.getSimpleName()).get(0);
 
-				EntityComponent newEntityComponent;
-				if (componentElement.getName().equals(SpacialComponent.class.getSimpleName()))
-					newEntityComponent = new SpacialComponent(this);
-				else if (componentElement.getName().equals(DrawableComponent.class.getSimpleName()))
-					newEntityComponent = new DrawableComponent(this);
-				else if (componentElement.getName().equals(PhysicalComponent.class.getSimpleName()))
-					newEntityComponent = new PhysicalComponent(this);
-				else if (componentElement.getName().equals(CharacterComponent.class.getSimpleName()))
-					newEntityComponent = new CharacterComponent(this);
-				else if (componentElement.getName().equals(BattleComponent.class.getSimpleName()))
-					newEntityComponent = new BattleComponent(this);
-				else if (componentElement.getName().equals(ScriptableComponent.class.getSimpleName()))
-					newEntityComponent = new ScriptableComponent(this);
-				else
+				Component newComponent;
+				if (componentElement.getName().equals(PositionData.class.getSimpleName())) {
+					newComponent = new PositionData();
+				} else if (componentElement.getName().equals(PhysicsData.class.getSimpleName())) {
+					newComponent = new PhysicsData();
+				} else if (componentElement.getName().equals(GraphicsData.class.getSimpleName())) {
+					newComponent = new GraphicsData();
+				} else if (componentElement.getName().equals(CharacterData.class.getSimpleName())) {
+					newComponent = new CharacterData();
+				} else if (componentElement.getName().equals(BattleData.class.getSimpleName())) {
+					newComponent = new BattleData();
+				} else {
 					throw new InvalidTagException("valid component name",
 							componentElement.getName());
+				}
 
-				Component.checkAdditionValidity(this, newEntityComponent);
-				newEntityComponent.init(componentElement);
-				this.addComponent(newEntityComponent);
+				newComponent.init(componentElement);
+				this.components.put(newComponent);
+			}
+		}
+		
+		// categories
+		this.categories = new IDableCollection<Class<? extends Category>, Category>();
+		for(Class<?> category : knownCategories) {
+			// get new instance of each category
+			Category newCategory;
+			try {
+				newCategory = (Category)category.newInstance();
+			} catch (IllegalAccessException | InstantiationException e) { // if can't instantiate, wrong class is in categories; warn and skip to next one
+				System.err.println("WARNING: There is a problem with the list of known categories");
+				continue;
+			}
+			
+			// check if it fits, and if so add it
+			boolean fits = true;
+			for(Class<? extends Component> component : newCategory.getRequiredComponents()) {
+				if(!this.has(component)) {
+					fits = false;
+				}
+			}
+			if(fits) {
+				newCategory.init(this);
+				this.categories.put(newCategory);
 			}
 		}
 	}
-
-	// Main loop methods
-	public void update(int delta, Input input, Scene scene) {
-		for (Component component : this)
-			((EntityComponent) component).update(delta, input, scene);
-	}
-	public void render(Graphics g, Scene scene) {
-		if (this.hasComponent(DrawableComponent.class))
-			this.drawable().render(g, scene);
-	}
-
+	
 	// Getters and setters
 	public String getName() {
-		return name;
+		return this.name;
 	}
 	
-	// Get components
-	public SpacialComponent spacial() {
-		return (SpacialComponent)this.getComponent(SpacialComponent.class);
+	// Access
+	public boolean has(Class<? extends Component> component) {
+		return components.contains(component);
 	}
-	public DrawableComponent drawable() {
-		return (DrawableComponent)this.getComponent(DrawableComponent.class);
+	public Component get(Class<? extends Component> component) {
+		return components.get(component);
 	}
-	public PhysicalComponent physics() {
-		return (PhysicalComponent)this.getComponent(PhysicalComponent.class);
+	public boolean is(Class<? extends Category> category) {
+		return categories.contains(category);
 	}
-	public CharacterComponent character() {
-		return (CharacterComponent)this.getComponent(CharacterComponent.class);
+	public Category as(Class<? extends Category> category) {
+		return categories.get(category);
 	}
-	public ScriptableComponent scriptable() {
-		return (ScriptableComponent)this.getComponent(ScriptableComponent.class);
-	}
-	public BattleComponent battleable() {
-		return (BattleComponent)this.getComponent(BattleComponent.class);
-	}
-	
+
 	// Commands
 	public void executeCommand(CommandInstance command) {
-		if (this.hasComponent(ScriptableComponent.class))
+		/*
+		if (this.is(ScriptableComponent.class))
 			this.scriptable().executeCommand(command);
 		else
 			throw new CommandException("Entity '" + this.getID()
 					+ "' cannot execute command because it does not have a scriptable component");
+					*/
 	}
-
+	
 	// Utilities
 	@Override
 	public String toString() {
-		String result = this.getID() + ": {\n";
-		for (Component c : this) {
-			result += "\t" + c.toString() + "\n";
+		String result = "";
+		for(Component c : this.components) {
+			result += c.toString() + "\n";
 		}
-		return result + "}";
+		return result;
 	}
 }

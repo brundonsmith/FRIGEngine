@@ -3,20 +3,15 @@ package frigengine.gui;
 import java.util.ArrayList;
 import java.util.List;
 
-import frigengine.scene.Scene;
-
 public abstract class AbstractLinearMenu extends GUIFrame {
 	// Attributes
 	protected List<MenuItem> items;
 	protected int selectedIndex;
 	protected boolean isWrapping;
 	protected boolean isVertical;
-	protected List<MenuSelectListener> selectListeners;
 	
 	// Constructors and initialization
-	public AbstractLinearMenu(Scene context) {
-		super(context);
-		
+	public AbstractLinearMenu() {
 		// items
 		this.items = new ArrayList<MenuItem>();
 		
@@ -28,9 +23,6 @@ public abstract class AbstractLinearMenu extends GUIFrame {
 		
 		// isVertical
 		this.isVertical = true;
-		
-		// selectListeners
-		this.selectListeners = new ArrayList<MenuSelectListener>();
 	}
 	
 	// Getters and setters
@@ -40,7 +32,7 @@ public abstract class AbstractLinearMenu extends GUIFrame {
 	public List<MenuItem> getItems() {
 		return items;
 	}
-	public void addItem(MenuItem item) {
+	public void addMenuItem(MenuItem item) {
 		this.items.add(item);
 	}
 	public MenuItem	getSelection() {
@@ -61,37 +53,32 @@ public abstract class AbstractLinearMenu extends GUIFrame {
 		this.selectedIndex++;
 		
 		if(this.selectedIndex >= this.getNumItems()) {
-			if(isWrapping)
+			if(isWrapping) {
 				this.selectedIndex = this.selectedIndex % this.getNumItems();
-			else
-				while(this.selectedIndex >= this.getNumItems())
+			} else {
+				while(this.selectedIndex >= this.getNumItems()) {
 					this.selectedIndex--;
+				}
+			}
 		}
 	}
 	public void back() {
 		this.selectedIndex--;
 		
 		if(this.selectedIndex < 0) {
-			if(isWrapping)
+			if(isWrapping) {
 				this.selectedIndex = (this.selectedIndex + this.getNumItems()) % this.getNumItems();
-			else 
-				while(this.selectedIndex < 0)
+			} else {
+				while(this.selectedIndex < 0) {
 					this.selectedIndex++;
+				}
+			}
 		}
 	}
+	public void cancel() {
+		this.notifyClose();
+	}
 	public void select() {
-		for(MenuSelectListener listener : selectListeners)
-			listener.itemSelected(this, this.getSelection());
-		this.close();
-	}
-	
-	// Events
-	public final void addSelectListener(MenuSelectListener listener) {
-		selectListeners.add(listener);
-	}
-	protected final void selectItem(MenuItem selected) {
-		for(MenuSelectListener listener : this.selectListeners)
-			listener.itemSelected(this, selected);
-		this.close();
+		this.notifySelect(this.getSelection());
 	}
 }

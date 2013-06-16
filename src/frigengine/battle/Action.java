@@ -1,48 +1,44 @@
 package frigengine.battle;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
-import frigengine.entities.BattleComponent;
+import frigengine.entities.Battleable;
 import frigengine.util.IDable;
 
 public abstract class Action extends IDable<String> {
 	// Attributes
-	private ActionType type;
-	private int chargeTime;
-	private Set<StatsEffect> effects;
+	protected  ActionCategory category;
+	protected int chargeTime;
 	
 	// Constructors and initialization
-	public Action(String name, ActionType type, int chargeTime, StatsEffect[] effects) {
+	protected Action(String name) {
 		this.id = name;
-		this.type = type;
+	}
+	public Action(String name, ActionCategory category, int chargeTime) {
+		this.id = name;
+		this.category = category;
 		this.chargeTime = chargeTime;
-		this.effects = new HashSet<StatsEffect>(Arrays.asList(effects));
 	}
 	
 	// Getters and setters
 	public String getName() {
-		return this.getID();
+		return this.getId();
 	}
-	public ActionType getType() {
-		return this.type;
+	public ActionCategory getCategory() {
+		return this.category;
 	}
 	public int getChargeTime() {
 		return this.chargeTime;
 	}
-	public Set<StatsEffect> getEffects() {
-		return this.effects;
-	}
-	public ActionInstance getInstance(BattleComponent source, BattleComponent target) {
+	public ActionInstance getInstance(Battleable source, Battleable target) {
 		return new ActionInstance(this, source, target);
 	}
-	
-	// Application
-	public abstract void apply(BattleComponent source, BattleComponent target);
 
-	// ActionType
-	public enum ActionType {
+	// Application
+	public abstract void apply(Battleable source, Battleable target, Set<Battleable> allies, Set<Battleable> enemi);
+	
+	// ActionCategory
+	public enum ActionCategory {
 		ATTACK,
 		SPECIAL
 	}

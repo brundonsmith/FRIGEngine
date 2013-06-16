@@ -5,33 +5,29 @@ import java.util.ArrayList;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.UnicodeFont;
-import org.newdawn.slick.geom.Rectangle;
 
-import frigengine.FRIGAnimation;
 import frigengine.FRIGGame;
-import frigengine.scene.Scene;
+import frigengine.Scene;
+import frigengine.events.GUICloseListener;
+import  frigengine.util.geom.Rectangle;
+import frigengine.util.graphics.Animation;
 
-public abstract class GUIFrame {
+public abstract class GUIFrame implements GUICloseListener {
 	// Constants
 	private static final int DEFAULT_BORDER_HORIZONTAL = 50;
 	private static final int DEFAULT_BORDER_VERTICAL = 30;
 	
 	// Attributes
-	protected Scene context;
 	protected UnicodeFont font;
-	protected FRIGAnimation background;
+	protected Animation background;
 	protected Rectangle presence;
 	protected int borderHorizontal;
 	protected int borderVertical;
 	protected boolean blocksTime;
 	protected boolean blocksInput;
-	private ArrayList<GUICloseListener> guiCloseEventListeners;
 
 	// Constructors and initialization
-	public GUIFrame(Scene context) {
-		// context
-		this.context = context;
-		
+	public GUIFrame() {
 		// font
 		this.font = FRIGGame.getInstance().getDefaultFont();
 		
@@ -115,15 +111,22 @@ public abstract class GUIFrame {
 		return this.blocksInput;
 	}
 	
-	// Close handling
-	public void close() {
-		for (GUICloseListener listener : guiCloseEventListeners)
-			listener.guiClosed(this);
+	// Events
+	private ArrayList<GUICloseListener> guiCloseEventListeners;
+	public final void notifyClose() {
+		for (GUICloseListener listener : guiCloseEventListeners) {
+			listener.guiClosed(this, null);
+		}
 	}
-	public void addGUICloseListener(GUICloseListener listener) {
-		if (guiCloseEventListeners == null)
+	public final void notifySelect(MenuItem menuItem) {
+		for (GUICloseListener listener : guiCloseEventListeners) {
+			listener.guiClosed(this, menuItem);
+		}
+	}
+	public final void addGUICloseListener(GUICloseListener listener) {
+		if (guiCloseEventListeners == null) {
 			guiCloseEventListeners = new ArrayList<GUICloseListener>();
-
+		}
 		guiCloseEventListeners.add(listener);
 	}
 }

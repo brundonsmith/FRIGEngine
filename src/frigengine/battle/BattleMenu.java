@@ -1,34 +1,51 @@
 package frigengine.battle;
 
-import frigengine.entities.BattleComponent;
-import frigengine.gui.BasicLinearMenu;
-import frigengine.gui.MenuItem;
-import frigengine.gui.MenuSelectListener;
+import org.lwjgl.input.Keyboard;
+import org.newdawn.slick.Input;
 
-public class BattleMenu extends BasicLinearMenu implements MenuSelectListener {
+import frigengine.entities.Battleable;
+import frigengine.gui.BasicLinearMenu;
+import frigengine.gui.RecursiveLinearMenu;
+import frigengine.gui.MenuItem;
+
+public class BattleMenu extends RecursiveLinearMenu {
 	// Attributes
-	private BattleComponent source;
+	private Battleable source;
 	
 	// Constructors and initialization
-	public BattleMenu(Battle battle, BattleComponent source) {	
-		super(battle);
-		
+	public BattleMenu(Battleable source) {	
 		// source
 		this.source = source;
 		
 		// Attack
-		this.addItem(new MenuItem(source.getAction("attack").getName()));
+		this.addMenuItem(new MenuItem(source.getActions().get("attack").getName()));
 		
 		// Specials
-		BasicLinearMenu specialsMenu = new BasicLinearMenu(this.context);
+		BasicLinearMenu specialsMenu = new BasicLinearMenu();
 		for(Action a : source.getActions()) {
-			specialsMenu.addItem(new MenuItem(a.getName()));
+			specialsMenu.addMenuItem(new MenuItem(a.getName()));
 		}
 		this.addSubMenu(new MenuItem("Specials"), specialsMenu);
 	}
 
+	// Main loop methods
+	@Override
+	public void update(int delta, Input input) {
+		if (input != null && input.isKeyPressed(Keyboard.KEY_DOWN)) {
+			this.forward();
+		} else if (input != null && input.isKeyPressed(Keyboard.KEY_UP)) {
+			this.back();
+		}
+		
+		if(input != null && input.isKeyPressed(Keyboard.KEY_RETURN)) {
+			this.select();
+		}
+	}
+
 	// Getters and setters
 	public Action getSelectedAction() {
-		return this.source.getAction(this.getSelection().getLabel());
+		return this.source.getActions().get(this.getSelection().getLabel());
 	}
+	
+	// TODO Need an enemy selection menu
 }

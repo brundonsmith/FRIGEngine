@@ -52,21 +52,21 @@ public abstract class Component extends IDable<Class<?>> {
 	}
 	public final static void checkAdditionValidity(Composable<? extends Component, ?> composable,
 			Component component) {
-		if (composable.hasComponent(component.getID()))
-			throw new ComponentException("Composable '" + composable.getID()
-					+ "' already has component of type '" + component.getID()
+		if (composable.hasComponent(component.getId()))
+			throw new ComponentException("Composable '" + composable.getId()
+					+ "' already has component of type '" + component.getId()
 					+ "', and cannot have another one added");
 
-		for (Class<?> dependency : Component.dependencies.get(component.getID()))
+		for (Class<?> dependency : Component.dependencies.get(component.getId()))
 			if (!composable.hasComponent(dependency))
-				throw new ComponentException("Component '" + component.getID()
-						+ "' cannot be added to composable '" + composable.getID()
+				throw new ComponentException("Component '" + component.getId()
+						+ "' cannot be added to composable '" + composable.getId()
 						+ "' because dependency '" + dependency + "' is not present");
 
-		for (Class<?> exclusive : Component.exclusives.get(component.getID()))
+		for (Class<?> exclusive : Component.exclusives.get(component.getId()))
 			if (composable.hasComponent(exclusive))
-				throw new ComponentException("Component '" + component.getID()
-						+ "' cannot be added to composable '" + composable.getID()
+				throw new ComponentException("Component '" + component.getId()
+						+ "' cannot be added to composable '" + composable.getId()
 						+ "' because exclusive '" + exclusive + "' is present");
 	}
 	public final static void checkRemovalValidity(Composable<? extends Component, ?> composable,
@@ -76,10 +76,10 @@ public abstract class Component extends IDable<Class<?>> {
 					+ "', and cannot have it removed");
 
 		for (Component component : composable)
-			if (Arrays.asList(dependencies.get(component.getID())).contains(id))
+			if (Arrays.asList(dependencies.get(component.getId())).contains(id))
 				throw new ComponentException("Component '" + id
-						+ "' cannot be removed from composable '" + composable.getID()
-						+ "' because component '" + component.getID() + "' depends on it");
+						+ "' cannot be removed from composable '" + composable.getId()
+						+ "' because component '" + component.getId() + "' depends on it");
 	}
 	public static List<Class<?>> getRegisteredComponents() {
 		return Collections.unmodifiableList(Component.registeredComponents);

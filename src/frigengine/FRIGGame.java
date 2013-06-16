@@ -5,7 +5,9 @@ import java.awt.Font;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -25,18 +27,20 @@ import frigengine.battle.Battle;
 import frigengine.battle.BattleTemplate;
 import frigengine.commands.*;
 import frigengine.entities.*;
-import frigengine.exceptions.AttributeFormatException;
-import frigengine.exceptions.DataParseException;
-import frigengine.exceptions.InvalidTagException;
-import frigengine.scene.*;
+import frigengine.exceptions.data.AttributeFormatException;
+import frigengine.exceptions.data.InvalidTagException;
+import frigengine.exceptions.data.MissingFileException;
+import frigengine.field.Area;
 import frigengine.util.*;
+import frigengine.util.graphics.Animation;
 
 public class FRIGGame implements Game {
 	// Singleton
 	private static FRIGGame instance;
 	public static FRIGGame getInstance() {
-		if(instance == null)
+		if(instance == null) {
 			instance = new FRIGGame();
+		}
 		return instance;
 	}
 
@@ -44,24 +48,17 @@ public class FRIGGame implements Game {
 	private GameContainer container;
 	private String title;
 	private UnicodeFont defaultFont;
+	private IDableCollection<String, Animation> guiAssets;
 
 	private IDableCollection<String, Entity> entities;
-
-	private String currentArea;
-	private IDableCollection<String, Area> areas;
-
-	private IDableCollection<String, Script> scripts;
-	private ThreadPoolExecutor runningScripts;
-
+	private SelectableCollection<String, Area> areas;
 	private Battle currentBattle;
 	private IDableCollection<String, BattleTemplate> battleTemplates;
 	
-	private IDableCollection<String, FRIGAnimation> guiAssets;
+	private IDableCollection<String, Script> scripts;
+	private ThreadPoolExecutor runningScripts;
 
 	// Constructors and initialization
-	public FRIGGame() {
-		EntityComponent.registerComponents();
-	}
 	@Override
 	public void init(GameContainer container) throws SlickException {
 		// Parse
@@ -70,11 +67,13 @@ public class FRIGGame implements Game {
 		try {
 			rootElement = config.parse("content/initialization.xml");
 		} catch (SlickException e) {
-			throw new DataParseException(
-					"Game doesn't have a valid initialization.xml file in the content directory");
+			throw new MissingFileException("content/initialization.xml");
 		}
-		if (!rootElement.getName().equals(FRIGGame.getTagName()))
-			throw new InvalidTagException(FRIGGame.getTagName(), rootElement.getName());
+		
+		// Check element name
+		if (!rootElement.getName().equals(this.getClass().getSimpleName())) {
+			throw new InvalidTagException(this.getClass().getSimpleName(), rootElement.getName());
+		}
 		
 		// container
 		this.container = container;
@@ -110,61 +109,59 @@ public class FRIGGame implements Game {
 		this.defaultFont.addAsciiGlyphs();
 		this.defaultFont.loadGlyphs();
 		
-		// entities
-		this.entities = new IDableCollection<String, Entity>();
-		for (String xmlName : new File("content/entities").list(xmlFilter())) {
-			Entity newEntity = new Entity(IDable.iDFromPath(xmlName));
-			newEntity.init(config.parse("content/entities/" + xmlName));
-			this.entities.add(newEntity);
-		}
-		// areas
-		this.areas = new IDableCollection<String, Area>();
-		for (String xmlName : new File("content/areas").list(xmlFilter())) {
-			Area newArea = new Area(IDable.iDFromPath(xmlName));
-			newArea.init(config.parse("content/areas/" + xmlName));
-			this.areas.add(newArea);
-		}
-		// Current area
-		this.setCurrentArea(rootElement.getAttribute("starting_area", ""));
-
-		// scripts
-		this.scripts = new IDableCollection<String, Script>();
-		for (String xmlName : new File("content/scripts").list(xmlFilter())) {
-			Script newScript = new Script();
-			try {
-				newScript.init("content/scripts/" + xmlName);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
-			this.scripts.add(newScript);
-		}
-		// runningScripts
-		this.runningScripts = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-
-		// battleTemplates
-		this.battleTemplates = new IDableCollection<String, BattleTemplate>();
-		for (String xmlPath : new File("content/battles").list(xmlFilter())) {
-			BattleTemplate newBattleTemplate = new BattleTemplate(IDable.iDFromPath(xmlPath));
-			newBattleTemplate.init(config.parse("content/battles/" + xmlPath));
-			this.battleTemplates.add(newBattleTemplate);
-		}
-		
-		// guiImages
-		this.guiAssets = new IDableCollection<String, FRIGAnimation>();
+		// guiAssets
+		this.guiAssets = new IDableCollection<String, Animation>();
 		XMLElement guiAssetRegistry;
 		try {
 			guiAssetRegistry = config.parse("content/gui/gui_asset_registry.xml");
 		} catch (SlickException e) {
-			throw new DataParseException(
-					"Game doesn't have a valid gui_asset_registry.xml file in the content/gui directory");
+			throw new MissingFileException("content/gui/gui_asset_registry.xml");
 		}
-		for (int i = 0; i < guiAssetRegistry.getChildrenByName(FRIGAnimation.class.getSimpleName()).size(); i++) {
-			XMLElement child = guiAssetRegistry.getChildrenByName(FRIGAnimation.class.getSimpleName()).get(i);
-			FRIGAnimation image = new FRIGAnimation();
+		for (int i = 0; i < guiAssetRegistry.getChildrenByName(Animation.class.getSimpleName()).size(); i++) {
+			XMLElement child = guiAssetRegistry.getChildrenByName(Animation.class.getSimpleName()).get(i);
+			Animation image = new Animation();
 			image.init(child);
-			this.guiAssets.add(image);
+			this.guiAssets.put(image);
+		}
+		
+		// entities
+		this.entities = new IDableCollection<String, Entity>();
+		for (File xmlFile : FRIGGame.listXMLFilesRecursive("content/entities")) {
+			Entity newEntity = new Entity(FRIGGame.idFromAbsolutePath(xmlFile.getAbsolutePath()));
+			newEntity.init(config.parse(xmlFile.getAbsolutePath()));
+			this.entities.put(newEntity);
+		}
+		
+		// areas
+		this.areas = new SelectableCollection<String, Area>();
+		this.areas.select((rootElement.getAttribute("starting_area", "")));
+		for (File xmlFile : FRIGGame.listXMLFilesRecursive("content/areas")) {
+			Area newArea = new Area(FRIGGame.idFromAbsolutePath(xmlFile.getAbsolutePath()));
+			newArea.init(config.parse(xmlFile.getAbsolutePath()));
+			this.areas.put(newArea);
+		}
+		
+		// battleTemplates
+		this.battleTemplates = new IDableCollection<String, BattleTemplate>();
+		for (File xmlFile : FRIGGame.listXMLFilesRecursive("content/battles")) {
+			BattleTemplate newBattleTemplate = new BattleTemplate(FRIGGame.idFromAbsolutePath(xmlFile.getAbsolutePath()));
+			newBattleTemplate.init(config.parse(xmlFile.getAbsolutePath()));
+			this.battleTemplates.put(newBattleTemplate);
 		}
 
+		// scripts
+		this.scripts = new IDableCollection<String, Script>();
+		for (File xmlFile : FRIGGame.listXMLFilesRecursive("content/scripts")) {
+			Script newScript = new Script();
+			try {
+				newScript.init(xmlFile.getAbsolutePath());
+			} catch (FileNotFoundException e) {
+			}
+			this.scripts.put(newScript);
+		}
+		// runningScripts
+		this.runningScripts = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+		
 		// A quick update to let everything settle
 		this.update(container, 0);
 	}
@@ -176,22 +173,23 @@ public class FRIGGame implements Game {
 	// Main loop methods
 	@Override
 	public void update(GameContainer container, int delta) {
-		if(container.getInput().isKeyPressed(Keyboard.KEY_ESCAPE))
+		if(container.getInput().isKeyPressed(Keyboard.KEY_ESCAPE)) {
 			container.exit();
+		}
 		
-		// Battle or Area
-		if (currentBattle != null)
+		if (currentBattle != null) {				// If in battle
 			this.currentBattle.update(delta, container.getInput());
-		else
-			this.getCurrentArea().update(delta, container.getInput());
+		} else {										// If in field
+			this.areas.getSelected().update(delta, container.getInput());
+		}
 	}
 	@Override
 	public void render(GameContainer container, Graphics g) {
-		// Area/Battle
-		if (this.currentBattle != null)
+		if (this.currentBattle != null) {		// If in battle
 			this.currentBattle.render(g);
-		else
-			this.getCurrentArea().render(g);
+		} else {										// If in field
+			this.areas.getSelected().render(g);
+		}
 	}
 
 	// Getters and setters
@@ -205,18 +203,16 @@ public class FRIGGame implements Game {
 	public Entity getEntity(String id) {
 		return this.entities.get(id);
 	}
-	public boolean entityExists(String id) {
+	protected boolean entityExists(String id) {
 		return this.entities.contains(id);
 	}
-	public void setCurrentArea(String areaID) {
-		if(currentArea != null && !currentArea.equals(areaID))
-			getCurrentArea().closeAllDialogs();
-		currentArea = areaID;
+	private void setCurrentArea(String areaId) {
+		if(this.areas.hasSelection() && !this.areas.getSelectionId().equals(areaId)) {
+			this.areas.getSelected().closeAllDialogs();
+		}
+		this.areas.select(areaId);
 	}
-	public Area getCurrentArea() {
-		return this.areas.get(this.currentArea);
-	}
-	public FRIGAnimation getGuiAsset(String id) {
+	public Animation getGuiAsset(String id) {
 		return this.guiAssets.get(id).copy();
 	}
 	
@@ -247,10 +243,11 @@ public class FRIGGame implements Game {
 			default:
 				break;
 			}
-		} else if (command.getCommandType() == CommandType.AREA_COMMAND)
+		} else if (command.getCommandType() == CommandType.AREA_COMMAND) {
 			this.areas.get(command.getArguments()[0]).executeCommand(command);
-		else if (command.getCommandType() == CommandType.ENTITY_COMMAND)
+		} else if (command.getCommandType() == CommandType.ENTITY_COMMAND) {
 			this.entities.get(command.getArguments()[0]).executeCommand(command);
+		}
 	}
 	public void executeScript(String scriptID, String[] args) {
 		runningScripts.execute(scripts.get(scriptID).getInstance(args));
@@ -262,10 +259,32 @@ public class FRIGGame implements Game {
 	}
 
 	// Utilities
-	public static String getTagName() {
-		return "game";
+	public static String idFromAbsolutePath(String path) {
+		String endOfForwardSlash = path.split("/")[path.split("/").length-1];
+		String endOfBackSlash = endOfForwardSlash.split("\\\\")[endOfForwardSlash.split("\\\\").length-1];
+		return endOfBackSlash.split("\\.")[0];
 	}
-	private static FilenameFilter xmlFilter() {
+	private static List<File> listXMLFilesRecursive(String directory) {
+		List<File> result = new ArrayList<File>();
+		result.addAll(FRIGGame.listXMLFiles(directory));
+		for(File subDirectory : FRIGGame.listDirectories(directory)) {
+			result.addAll(FRIGGame.listXMLFilesRecursive(subDirectory.getAbsolutePath()));
+		}
+		return result;
+	}
+	private static List<File> listXMLFiles(String directory) {
+		return Arrays.asList(new File(directory).listFiles(FRIGGame.xmlFilter()));
+	}
+	private static List<File> listDirectories(String directory) {
+		List<File> directories = new ArrayList<File>();
+		for(File f : new File(directory).listFiles()) {
+			if(f.isDirectory()) {
+				directories.add(f);
+			}
+		}
+		return directories;
+	}
+ 	private static FilenameFilter xmlFilter() {
 		return new FilenameFilter() {
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".xml");

@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import frigengine.FRIGGame;
-import frigengine.exceptions.CommandArgumentParseException;
+import frigengine.exceptions.command.CommandArgumentParseException;
 
 public class ScriptThread implements Runnable {
 	// Attributes
@@ -22,10 +22,12 @@ public class ScriptThread implements Runnable {
 	}
 	void addCommand(CommandInstance command) {
 		CommandInstance newCommand = new CommandInstance(command);
-		for (int i = 0; i < newCommand.getArguments().length; i++)
-			if (newCommand.getArgument(i).matches("\\$[0-9]+*"))
+		for (int i = 0; i < newCommand.getArguments().length; i++) {
+			if (newCommand.getArgument(i).matches("\\$[0-9]+*")) {
 				newCommand.setArgument(i,
 						args[Integer.parseInt(newCommand.getArgument(i).substring(1))]);
+			}
+		}
 		this.commands.add(newCommand);
 	}
 

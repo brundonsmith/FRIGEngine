@@ -5,23 +5,20 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 
-import frigengine.scene.Scene;
+import frigengine.Scene;
 
 public abstract class AbstractDialog extends GUIFrame {
 	// Attributes
 	protected Queue<String> pages;
 
 	// Constructors and initialization
-	public AbstractDialog(Scene context, String content) {
-		super(context);
-	}
-	public AbstractDialog(Scene context, List<String> content) {
-		super(context);
-		
+	public AbstractDialog(String content) {
 		// pages
-		this.pages = new LinkedList<String>();
-		for(String page : content)
-			this.pages.add(page);
+		this.setContent(content);
+	}
+	public AbstractDialog(List<String> pages) {
+		// pages
+		this.setPages(pages);
 	}
 	public AbstractDialog(AbstractDialog source) {
 		super(source);
@@ -35,11 +32,6 @@ public abstract class AbstractDialog extends GUIFrame {
 	public String getCurrentPage() {
 		return this.pages.peek();
 	}
-	public void setPages(List<String> pages) {
-		this.pages = new LinkedList<String>();
-		for(String page : pages)
-			this.pages.add(page);
-	}
 	public void setContent(String content) {
 		this.pages = new LinkedList<String>();
 		
@@ -47,9 +39,9 @@ public abstract class AbstractDialog extends GUIFrame {
 		StringBuilder page = new StringBuilder();
 		while(contentScanner.hasNext()) {
 			String word = contentScanner.next();
-			if(Scene.stringFitsBox(page.toString(), this.presence, this.font))
+			if(Scene.stringFitsBox(page.toString(), this.presence, this.font)) {
 				page.append(word + " ");
-			else {
+			} else {
 				this.pages.add(page.toString());
 				page = new StringBuilder(word + " ");
 			}
@@ -57,11 +49,17 @@ public abstract class AbstractDialog extends GUIFrame {
 		this.pages.add(page.toString());
 		contentScanner.close();
 	}
+	public void setPages(List<String> pages) {
+		this.pages = new LinkedList<String>();
+		for(String page : pages)
+			this.pages.add(page);
+	}
 	
 	// Controls
 	public void iterate() {
 		this.pages.remove();
-		if(this.pages.size() == 0)
-			this.close();
+		if(this.pages.size() == 0) {
+			this.notifyClose();
+		}
 	}
 }

@@ -4,22 +4,22 @@ import java.util.Deque;
 
 import org.newdawn.slick.Input;
 
-import frigengine.AnimationFinishedListener;
-import frigengine.FRIGAnimation;
+import frigengine.Scene;
+import frigengine.SceneLayer;
 import frigengine.entities.*;
-import frigengine.gui.AbstractLinearMenu;
+import frigengine.events.AnimationFinishedListener;
+import frigengine.events.BattleableMeterFilledListener;
+import frigengine.events.GUICloseListener;
 import frigengine.gui.GUIFrame;
 import frigengine.gui.MenuItem;
-import frigengine.gui.MenuSelectListener;
-import frigengine.scene.Scene;
-import frigengine.scene.SceneLayer;
 import frigengine.util.IDableCollection;
+import frigengine.util.graphics.Animation;
 
-public class Battle extends Scene implements StageChangeListener, MenuSelectListener, AnimationFinishedListener {
+public class Battle extends Scene implements BattleableMeterFilledListener, GUICloseListener, AnimationFinishedListener {
 	// Attributes
 	private IDableCollection<String, Entity> playerParty;
 	private IDableCollection<String, Entity> enemies;
-	private Deque<BattleComponent> decisionQueue;
+	private Deque<String> decisionQueue;
 	private Deque<ActionInstance> actionQueue;
 
 	// Constructors and initialization
@@ -40,35 +40,45 @@ public class Battle extends Scene implements StageChangeListener, MenuSelectList
 		for (Object o : this.guiStack.toArray()) {
 			GUIFrame frame = (GUIFrame) o;
 			frame.update(timeBlocked ? 0 : delta, inputBlocked ? null : input);
-			if (frame.getBlocksTime())
+			if (frame.getBlocksTime()) {
 				timeBlocked = true;
-			if (frame.getBlocksInput())
+			}
+			if (frame.getBlocksInput()) {
 				inputBlocked = true;
+			}
 		}
 
 		// Layers
-		for (SceneLayer layer : this.layers)
-			layer.update(timeBlocked ? 0 : delta, inputBlocked ? null : input, this);
+		for (SceneLayer layer : this.layers) {
+			layer.update(timeBlocked ? 0 : delta);
+		}
 
 		// Entities
-		for (Entity entity : this.entities)
-			entity.update(timeBlocked ? 0 : delta, inputBlocked ? null : input, this);
+		for (Entity entity : this.entities) {
+			if(entity.is(Battleable.class)) {
+				((Battleable)entity.as(Battleable.class)).update(timeBlocked ? 0 : delta, this.getChunks(Battleable.class));
+			}
+			if(entity.is(Drawable.class)) {
+				((Drawable)entity.as(Drawable.class)).update(timeBlocked ? 0 : delta);
+			}
+		}
+		
+		// Open decision menu
 	}
 	
 	// Events
 	@Override
-	public void stageChanged(BattleComponent source) {
+	public void battleableMeterFilled(Battleable source) {
 		switch(source.getCurrentStage()) {
 		case DECIDING:
-			this.decisionQueue.add(source);
+			this.decisionQueue.add(source.getEntityId());
 			break;
 		case WAITING:
 			if(!this.actionQueue.isEmpty()) {
-				this.actionQueue.peek().execute();
-				this.actionQueue.peek().getSource().animateAction(this.actionQueue.peek().getAction().getID());
-			}
-			else if(!this.decisionQueue.isEmpty()) {
-				this.openGUI(new BattleMenu(this, decisionQueue.peek()));
+				//this.actionQueue.peek().execute();
+				this.actionQueue.peek().getSource().animateAction(this.actionQueue.peek().getAction().getId());
+			} else if(!this.decisionQueue.isEmpty()) {
+				this.openGUI(new BattleMenu((Battleable)this.playerParty.get(decisionQueue.peek()).as(Battleable.class)));
 				this.decisionQueue.remove();
 			}
 			break;
@@ -86,14 +96,15 @@ public class Battle extends Scene implements StageChangeListener, MenuSelectList
 			     play animation
 			     apply effects to target
 		 */
+		
 	}
 	@Override
-	public void itemSelected(AbstractLinearMenu source, MenuItem selected) {
+	public void guiClosed(GUIFrame source, MenuItem selected) {
 		//if(source instanceof BattleMenu)
 			//this.actionQueue.add(((BattleMenu) source).getSelectedAction().g);
 	}
 	@Override
-	public void animationFinished(FRIGAnimation source) {
+	public void animationFinished(Animation source) {
 		
 	}
 }

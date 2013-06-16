@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import frigengine.FRIGGame;
 import frigengine.util.IDable;
 
 public class Script extends IDable<String> {
@@ -15,7 +16,7 @@ public class Script extends IDable<String> {
 	public Script() {
 	}
 	public void init(String scriptPath) throws FileNotFoundException {
-		this.id = IDable.iDFromPath(scriptPath);
+		this.id = FRIGGame.idFromAbsolutePath(scriptPath);
 
 		Scanner scriptScanner = new Scanner(new File(scriptPath));
 

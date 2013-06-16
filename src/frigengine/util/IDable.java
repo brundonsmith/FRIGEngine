@@ -5,15 +5,12 @@ public abstract class IDable<E> {
 	protected E id;
 
 	// Getters and setters
-	public E getID() {
+	public E getId() {
 		return id;
 	}
 
 	// Utilities
 	public boolean equals(IDable<E> other) {
 		return this.id.equals(other.id);
-	}
-	public static String iDFromPath(String contentPath) {
-		return contentPath.split("/")[contentPath.split("/").length - 1].split("\\.")[0];
 	}
 }

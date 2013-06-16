@@ -3,12 +3,12 @@ package frigengine.gui;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.geom.Rectangle;
 
 import frigengine.FRIGGame;
+import frigengine.Scene;
 import frigengine.entities.DrawableComponent;
 import frigengine.entities.Entity;
-import frigengine.scene.Scene;
+import  frigengine.util.geom.Rectangle;
 
 public class MovingSpeechDialog extends AbstractDialog {
 	// Constants
@@ -36,8 +36,9 @@ public class MovingSpeechDialog extends AbstractDialog {
 		this.presence.setX(speaker.drawable().getMinX());
 		this.presence.setY(speaker.drawable().getMinY() - OFFSET_FROM_SPEAKER - this.presence.getHeight());
 		
-		if(input.isKeyPressed(Keyboard.KEY_SLASH))
+		if(input.isKeyPressed(Keyboard.KEY_SLASH)) {
 			this.iterate();
+		}
 	}
 	@Override
 	public void render(Graphics g, Scene scene) {

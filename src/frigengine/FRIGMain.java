@@ -6,11 +6,11 @@ import org.newdawn.slick.SlickException;
 
 public class FRIGMain {
 	public static void main(String[] args) throws SlickException {
-		int width = 1600;
-		int height = 900;
+		int width = 800;
+		int height = 450;
 		ScalableGame game = new ScalableGame(FRIGGame.getInstance(), width, height);
 		AppGameContainer gameContainer = new AppGameContainer(game);
-		gameContainer.setDisplayMode(width, height, true);
+		gameContainer.setDisplayMode(width, height, false);
 		gameContainer.setTargetFrameRate(240);
 		
 		gameContainer.start();

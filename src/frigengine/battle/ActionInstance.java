@@ -1,15 +1,15 @@
 package frigengine.battle;
 
-import frigengine.entities.BattleComponent;
+import frigengine.entities.Battleable;
 
 public class ActionInstance {
 	// Attributes
 	private Action action;
-	private BattleComponent source;
-	private BattleComponent target;
+	private Battleable source;
+	private Battleable target;
 	
 	// Constructors and initialization
-	ActionInstance(Action action, BattleComponent source, BattleComponent target) {
+	ActionInstance(Action action, Battleable source, Battleable target) {
 		this.action = action;
 		this.source = source;
 		this.target = target;
@@ -19,15 +19,15 @@ public class ActionInstance {
 	public Action getAction() {
 		return this.action;
 	}
-	public BattleComponent getSource() {
+	public Battleable getSource() {
 		return this.source;
 	}
-	public BattleComponent getTarget() {
+	public Battleable getTarget() {
 		return this.target;
 	}
 	
-	// Other methods
+	// Operations
 	public void execute() {
-		this.action.apply(this.source, this.target);
+		this.action.apply(source, target, null, null);
 	}
 }

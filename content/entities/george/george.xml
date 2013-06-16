@@ -1,0 +1,45 @@
+<Entity name="Bob" >
+	<PositionData/>
+	<GraphicsData width="20" height="30">
+		<Animation id="stand_nw" sprite="content/entities/george/player_1_idle_n.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_n" sprite="content/entities/george/player_1_idle_n.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_ne" sprite="content/entities/george/player_1_idle_n.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_sw" sprite="content/entities/george/player_1_idle_s.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_s" sprite="content/entities/george/player_1_idle_s.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_se" sprite="content/entities/george/player_1_idle_s.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_e" sprite="content/entities/george/player_1_idle_e.png" rows="1" cols="1" spf="0.2"/>
+		<Animation id="stand_w" sprite="content/entities/george/player_1_idle_w.png" rows="1" cols="1" spf="0.2"/>
+		
+		<Animation id="walk_nw" sprite="content/entities/george/player_1_move_n.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_n" sprite="content/entities/george/player_1_move_n.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_ne" sprite="content/entities/george/player_1_move_n.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_sw" sprite="content/entities/george/player_1_move_s.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_s" sprite="content/entities/george/player_1_move_s.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_se" sprite="content/entities/george/player_1_move_s.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_e" sprite="content/entities/george/player_1_move_e.png" rows="1" cols="3" spf="0.2"/>
+		<Animation id="walk_w" sprite="content/entities/george/player_1_move_w.png" rows="1" cols="3" spf="0.2"/>
+		
+		<Animation id="fun" sprite="content/entities/box/animation.png" rows="2" cols="2" spf="0.1"/>
+	</GraphicsData>
+	<CharacterData speed="100">
+		<animation_idle_nw id="stand_nw"/>
+		<animation_idle_n id="stand_n"/>
+		<animation_idle_ne id="stand_ne"/>
+		<animation_idle_sw id="stand_sw"/>
+		<animation_idle_s id="stand_s"/>
+		<animation_idle_se id="stand_se"/>
+		<animation_idle_e id="stand_e"/>
+		<animation_idle_w id="stand_w"/>
+		<animation_move_nw id="walk_nw"/>
+		<animation_move_n id="walk_n"/>
+		<animation_move_ne id="walk_ne"/>
+		<animation_move_sw id="walk_sw"/>
+		<animation_move_s id="walk_s"/>
+		<animation_move_se id="walk_se"/>
+		<animation_move_e id="walk_e"/>
+		<animation_move_w id="walk_w"/>
+	</CharacterData>
+	<PhysicsData collidable="true" movable="true">
+		<Rectangle x="0" y="0" width="20" height="30"/>
+	</PhysicsData>
+</Entity>
