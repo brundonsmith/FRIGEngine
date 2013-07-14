@@ -1,33 +1,39 @@
 package frigengine.battle;
 
 import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.newdawn.slick.Input;
 
-import frigengine.Scene;
-import frigengine.SceneLayer;
-import frigengine.entities.*;
-import frigengine.events.AnimationFinishedListener;
-import frigengine.events.BattleableMeterFilledListener;
-import frigengine.events.GUICloseListener;
-import frigengine.gui.GUIFrame;
-import frigengine.gui.MenuItem;
-import frigengine.util.IDableCollection;
-import frigengine.util.graphics.Animation;
+import frigengine.battle.actions.ActionInstance;
+import frigengine.battle.gui.BattleMenu;
+import frigengine.core.AnimationFinishedListener;
+import frigengine.core.component.*;
+import frigengine.core.gui.*;
+import frigengine.core.scene.*;
+
 
 public class Battle extends Scene implements BattleableMeterFilledListener, GUICloseListener, AnimationFinishedListener {
 	// Attributes
-	private IDableCollection<String, Entity> playerParty;
-	private IDableCollection<String, Entity> enemies;
-	private Deque<String> decisionQueue;
+	private List<Entity> playerParty;
+	private List<Entity> enemies;
+	private Deque<Entity> decisionQueue;
 	private Deque<ActionInstance> actionQueue;
 
 	// Constructors and initialization
 	public Battle() {
 		super("battle");
+		this.decisionQueue = new LinkedList<Entity>();
+		this.actionQueue = new LinkedList<ActionInstance>();
 	}
-	public static Battle from(BattleTemplate battleTemplate) {
-		return null;
+	public  void init(BattleTemplate battleTemplate) {
+		this.enemies = battleTemplate.enemies;
+		this.layers = battleTemplate.layers;
+		
+		for(Entity e : this.enemies) {
+			e.getComponent(BattleComponent.class).resetAll();
+		}
 	}
 
 	// Main loop methods
@@ -48,19 +54,14 @@ public class Battle extends Scene implements BattleableMeterFilledListener, GUIC
 			}
 		}
 
+		// Entities
+		for (Entity entity : Entity.getEntities(this)) {
+			entity.update(timeBlocked ? 0 : delta, inputBlocked ? null : input);
+		}
+
 		// Layers
 		for (SceneLayer layer : this.layers) {
 			layer.update(timeBlocked ? 0 : delta);
-		}
-
-		// Entities
-		for (Entity entity : this.entities) {
-			if(entity.is(Battleable.class)) {
-				((Battleable)entity.as(Battleable.class)).update(timeBlocked ? 0 : delta, this.getChunks(Battleable.class));
-			}
-			if(entity.is(Drawable.class)) {
-				((Drawable)entity.as(Drawable.class)).update(timeBlocked ? 0 : delta);
-			}
 		}
 		
 		// Open decision menu
@@ -68,17 +69,17 @@ public class Battle extends Scene implements BattleableMeterFilledListener, GUIC
 	
 	// Events
 	@Override
-	public void battleableMeterFilled(Battleable source) {
-		switch(source.getCurrentStage()) {
+	public void battleableMeterFilled(Entity source) {
+		switch(source.getComponent(BattleComponent.class).getCurrentStage()) {
 		case DECIDING:
-			this.decisionQueue.add(source.getEntityId());
+			this.decisionQueue.add(source);
 			break;
-		case WAITING:
+		case ACTING:
 			if(!this.actionQueue.isEmpty()) {
 				//this.actionQueue.peek().execute();
-				this.actionQueue.peek().getSource().animateAction(this.actionQueue.peek().getAction().getId());
+				this.actionQueue.peek().getSource().getComponent(SpriteComponent.class).playAnimation(this.actionQueue.peek().getAction().getId());
 			} else if(!this.decisionQueue.isEmpty()) {
-				this.openGUI(new BattleMenu((Battleable)this.playerParty.get(decisionQueue.peek()).as(Battleable.class)));
+				this.openGUI(new BattleMenu(decisionQueue.peek().getComponent(BattleComponent.class)));
 				this.decisionQueue.remove();
 			}
 			break;

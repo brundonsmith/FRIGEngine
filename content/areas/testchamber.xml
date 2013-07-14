@@ -1,0 +1,64 @@
+<Area name="Testing Chamber" width="200" height="200" defaultcamera="cam">
+	<!-- Cameras-->
+	<Entity id="cam">
+		<PositionComponent x="0" y="0"/>
+		<CameraComponent width="160" height="90" centeredon="george"/>
+	</Entity>
+	<!-- Layers--> 
+	<SceneLayer depth="0" priority="0">
+		<Animation id="floor" sprite="content/areas/grass-texture.jpg" rows="1" cols="1" />
+	</SceneLayer>
+	<SceneLayer depth="1" priority="0">
+		<Animation id="clouds" sprite="content/areas/clouds2.png" rows="1" cols="1" />
+	</SceneLayer>
+	
+	<!-- Bounds-->
+	<Entity id="chamber_left_bound">
+		<PositionComponent/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="0" x2="0" y2="200"/>
+		</ColliderComponent>
+	</Entity>
+	<Entity id="chamber_top_bound">
+		<PositionComponent/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="0" x2="200" y2="0"/>
+		</ColliderComponent>
+	</Entity>
+	<Entity id="chamber_right_bound">
+		<PositionComponent/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="200" y1="0" x2="200" y2="200"/>
+		</ColliderComponent>
+	</Entity>
+	<Entity id="chamber_bottom_bound">
+		<PositionComponent/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="200" x2="200" y2="200"/>
+		</ColliderComponent>
+	</Entity>
+	
+	<!-- Entities-->
+	<Entity id="george">
+		<PositionComponent x="10" y="100"></PositionComponent>
+		<PlayerControllerComponent/>
+	</Entity>
+	<Entity id="portal">
+	    <PositionComponent x="100" y="110"></PositionComponent>
+	    <ColliderComponent collidable="true" movable="false">
+	        <Rectangle width="20" height="40"></Rectangle>
+	    </ColliderComponent>
+		<TriggerComponent>
+			<ChangeAreaEvent destination="door"></ChangeAreaEvent>
+		</TriggerComponent>
+	</Entity>
+	<Entity id="house">
+	    <PositionComponent x="100" y="50"></PositionComponent>
+	    <SpriteComponent defaultanimation="house" width="100" height="150">
+	        <Animation id="house" sprite="content/areas/house_exterior.png" rows="1" cols="1"></Animation>
+	    </SpriteComponent>
+	    <ColliderComponent collidable="true" movable="false">
+	        <Rectangle width="100" height="150"></Rectangle>
+	    </ColliderComponent>
+	</Entity>
+</Area>

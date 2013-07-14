@@ -1,6 +1,10 @@
-<Area name="Old House" width="500" height="400" player="george">
-	<Camera x="0" y="0" width="160" height="90" id="camera_1"/>
-	
+<Area name="Old House" width="500" height="400" defaultcamera="camera_1">
+	<!-- Cameras-->
+	<Entity id="camera_1">
+		<PositionComponent x="0" y="0"/>
+		<CameraComponent width="160" height="90" centeredon="george"/>
+	</Entity>
+	<!-- Layers--> 
 	<SceneLayer depth="0" priority="0">
 		<Animation id="house_background" sprite="content/areas/final-fantasy-vi.jpg" rows="1" cols="1" />
 	</SceneLayer>
@@ -8,8 +12,43 @@
 		<Animation id="fog" sprite="content/areas/rock_overlay.png" rows="1" cols="1" />
 	</SceneLayer>
 	
-	<entity_reference id="george" x="30" y="30" />
-	<entity_reference id="box" x="200" y="100" />
+	<!-- Bounds-->
+	<Entity id="house_left_bound">
+		<PositionComponent x="0" y="200"/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="0" x2="0" y2="400"/>
+		</ColliderComponent>
+	</Entity>
+	<Entity id="house_top_bound">
+		<PositionComponent x="250" y="0"/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="0" x2="500" y2="0"/>
+		</ColliderComponent>
+	</Entity>
+	<Entity id="house_right_bound">
+		<PositionComponent x="500" y="200"/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="0" x2="0" y2="400"/>
+		</ColliderComponent>
+	</Entity>
+	<Entity id="house_bottom_bound">
+		<PositionComponent x="250" y="400"/>
+		<ColliderComponent collidable="true" movable="false">
+			<Line x1="0" y1="0" x2="500" y2="0"/>
+		</ColliderComponent>
+	</Entity>
 	
-	<Line  x1="0" y1="50" x2="50" y2="0" />
+	<!-- Entities-->
+	<Entity id="box">
+		<PositionComponent x="200" y="100"></PositionComponent>
+	</Entity>
+	<Entity id="door">
+		<PositionComponent x="100" y="100"></PositionComponent>
+		<SpriteComponent defaultanimation="door_image" width="30" height="40">
+			<Animation id="door_image" sprite="content/areas/door.png" rows="1" cols="1" spf="0.1"/>
+		</SpriteComponent>
+		<ColliderComponent collidable="true" movable="false">
+			<Rectangle width="15" height="40"></Rectangle>
+		</ColliderComponent>
+	</Entity>
 </Area>
