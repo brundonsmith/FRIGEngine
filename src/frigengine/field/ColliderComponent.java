@@ -3,7 +3,8 @@ package frigengine.field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Shape;
@@ -27,17 +28,35 @@ public class ColliderComponent extends Component {
 	}
 	
 	// Attributes
-	private Shape presence;
-	private boolean isCollidable;
+	private Shape domain;
+	private Set<String> collisionGroups;
 	private boolean isMovable;
 	private Collection<Entity> collisions;
 	
 	// Constructors and initialization
 	public ColliderComponent() {
-		this.presence = null;
-		this.isCollidable = true;
-		this.isMovable = true;
+		this.domain = null;
+		this.collisionGroups = new HashSet<String>();
+		this.isMovable = false;
 		this.collisions = new ArrayList<Entity>();
+	}
+	private ColliderComponent(ColliderComponent other) {
+		super(other);
+		
+		this.domain = other.domain.transform(Transform.createTranslateTransform(0, 0));
+		this.collisionGroups = new HashSet<String>();
+		for(String s : other.collisionGroups) {
+			this.collisionGroups.add(s);
+		}
+		this.isMovable = other.isMovable;
+		this.collisions = new ArrayList<Entity>();
+		for(Entity e : other.collisions) {
+			this.collisions.add(e);
+		}
+	}
+	@Override
+	public ColliderComponent clone() {
+		return new ColliderComponent(this);
 	}
 	@Override
 	public void init(XMLElement xmlElement) {
@@ -46,31 +65,28 @@ public class ColliderComponent extends Component {
 			throw new InvalidTagException(this.getClass().getSimpleName(), xmlElement.getName());
 		}
 
-		// presence
-		if (xmlElement.getChildren().size() == 0 && this.presence == null) {
+		// domain
+		if (xmlElement.getChildren().size() == 0 && this.domain == null) {
 			throw new MissingElementException(Line.class.getSimpleName() + " OR " + Rectangle.class.getSimpleName() + " OR " + Ellipse.class.getSimpleName(), this.getClass().getSimpleName());
 		}  else {
 			XMLElement child = xmlElement.getChildren().get(0);
 			if (child.getName().equals(Line.class.getSimpleName())) { // Collision box is Line
-				this.presence = new Line();
-				((Line) this.presence).init(child);
+				this.domain = new Line();
+				((Line) this.domain).init(child);
 			} else if (child.getName().equals(Rectangle.class.getSimpleName())) { // Collision box is Rectangle
-				this.presence = new Rectangle();
-				((Rectangle) this.presence).init(child);
+				this.domain = new Rectangle();
+				((Rectangle) this.domain).init(child);
 			} else if (child.getName().equals(Ellipse.class.getSimpleName())) { // Collision box is Ellipse
-				this.presence = new Ellipse();
-				((Ellipse) this.presence).init(child);
+				this.domain = new Ellipse();
+				((Ellipse) this.domain).init(child);
 			} else {
 				throw new MissingElementException(Line.class.getSimpleName() + " OR " + Rectangle.class.getSimpleName() + " OR " + Ellipse.class.getSimpleName(), this.getClass().getSimpleName());
 			}
 		}
 		
-		// isCollidable
-		try {
-			this.isCollidable = xmlElement.getBooleanAttribute("collidable", this.isCollidable);
-		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(xmlElement.getName(), "collidable",
-					xmlElement.getAttribute("collidable"));
+		// collisionGroups
+		for(String group : xmlElement.getAttribute("collisiongroups", "").split(" ")) {
+			this.collisionGroups.add(group);
 		}
 		
 		// isMovable
@@ -90,19 +106,21 @@ public class ColliderComponent extends Component {
 			ColliderComponent c = e.getComponent(ColliderComponent.class);
 			// For each entity,
 			if (!c.equals(this)){ // if not this entity
-				if(this.getWorldPresence().intersects( // If there's an intersection,
-						c.getWorldPresence())) {
+				if(this.getWorldDomain().intersects( // If there's an intersection,
+						c.getWorldDomain())) {
 					this.collisions.add(e);
 				}
-				while (this.isCollidable && this.isMovable && c.getIsCollidable() && this.getWorldPresence().intersects( // If there's a collision,
-						c.getWorldPresence())) {
-					getComponent(PositionComponent.class).translate(ColliderComponent.calculateCollisionFix(this.getWorldPresence(), c.getWorldPresence()));
+				while (this.isMovable && this.getIsCollidable(c) && this.getWorldDomain().intersects( // If there's a collision,
+						c.getWorldDomain())) {
+					getComponent(PositionComponent.class).translate(ColliderComponent.calculateCollisionFix(this.getWorldDomain(), c.getWorldDomain()));
 				}
 			}
 		}
 	}
 	
 	// Collision calculation
+	private static Vector2f closestPoint = new Vector2f();
+	private static Vector2f difference = new Vector2f();
 	private static Vector2f calculateCollisionFix(Shape a, Shape b) {
 		Shape transformedA = a;
 		float fixX = 0;
@@ -111,9 +129,8 @@ public class ColliderComponent extends Component {
 		float increment = 0.01F;
 		if(b instanceof org.newdawn.slick.geom.Line) { 	// special case for line
 			while (transformedA.intersects(b)) {
-				Vector2f closest = new Vector2f();
-				((org.newdawn.slick.geom.Line)b).getClosestPoint(new Vector2f(a.getCenterX(), a.getCenterY()), closest);
-				Vector2f difference = new Vector2f(a.getCenterX(), a.getCenterY()).sub(closest).normalise().scale(increment);
+				((org.newdawn.slick.geom.Line)b).getClosestPoint(new Vector2f(a.getCenterX(), a.getCenterY()), closestPoint);
+				difference.set(a.getCenterX(), a.getCenterY()).sub(closestPoint).normalise().scale(increment);
 				fixX = difference.getX();
 				fixY = difference.getY();
 				transformedA = a.transform(Transform.createTranslateTransform(fixX, fixY));
@@ -123,7 +140,6 @@ public class ColliderComponent extends Component {
 			while (transformedA.intersects(b)) {
 				// calculate intersection amount
 				float currentIntersectRating = ColliderComponent.getIntersectRating(transformedA, b);
-				System.out.println("Intersect rating:\t\t" + currentIntersectRating);
 				
 				// calculate x change
 				float moveX = 0;
@@ -147,8 +163,6 @@ public class ColliderComponent extends Component {
 							b
 							);
 				}
-
-				System.out.println("move X:\t\t\t" + moveX + " - " + xImprovement);
 				
 				// calculate y change
 				float moveY = 0;
@@ -172,9 +186,6 @@ public class ColliderComponent extends Component {
 							b
 							);
 				}
-
-				System.out.println("move Y:\t\t\t" + moveY + " - " + yImprovement);
-				
 				
 				// apply changes
 				if(!(Math.abs(moveX) < 0.001F && Math.abs(moveY) < 0.001F)) { // if moved a significant amount
@@ -225,21 +236,42 @@ public class ColliderComponent extends Component {
 	}
 	
 	// Getters and setters
-	public Shape getLocalPresence() {
-		return this.presence;
+	public Shape getLocalDomain() {
+		return this.domain;
 	}
-	public Shape getWorldPresence() {
-		if(this.presence instanceof Line) {
-			return this.presence;
+	public Shape getWorldDomain() {
+		if(this.domain instanceof Line) {
+			return this.domain.transform(Transform.createTranslateTransform(getComponent(PositionComponent.class).getX(), getComponent(PositionComponent.class).getY()));
 		} else {
-			Shape relative = this.presence.transform(Transform.createTranslateTransform(0,0));
-			relative.setCenterX(getComponent(PositionComponent.class).getX() + this.presence.getX());
-			relative.setCenterY(getComponent(PositionComponent.class).getY() + this.presence.getY());
+			Shape relative = this.domain.transform(Transform.createTranslateTransform(0,0));
+			relative.setCenterX(getComponent(PositionComponent.class).getX() + this.domain.getX());
+			relative.setCenterY(getComponent(PositionComponent.class).getY() + this.domain.getY());
 			return relative;
 		}
 	}
-	protected boolean getIsCollidable() {
-		return this.isCollidable;
+	public void setWidth(float width) {
+		if(this.domain instanceof Rectangle) {
+			((Rectangle) this.domain).setWidth(width);
+		} else if(this.domain instanceof Ellipse) {
+			((Ellipse) this.domain).setRadius1(width);
+		}
+	}
+	public void setHeight(float height) {
+		if(this.domain instanceof Rectangle) {
+			((Rectangle) this.domain).setHeight(height);
+		} else if(this.domain instanceof Ellipse) {
+			((Ellipse) this.domain).setRadius2(height);
+		}
+	}
+	protected boolean getIsCollidable(ColliderComponent c) {
+		for(String g1 : this.collisionGroups) {
+			for(String g2 : c.collisionGroups) {
+				if(g1.equals(g2)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	protected boolean getIsMovable() {
 		return this.isMovable;
@@ -251,7 +283,7 @@ public class ColliderComponent extends Component {
 	// Utilities
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + ": {" + "collidable: " + this.isCollidable + ", movable:" + this.isMovable
-				+ ", presence:" + this.getWorldPresence() + "}";
+		return this.getClass().getSimpleName() + ": {" + "collision groups: " + Arrays.toString(this.collisionGroups.toArray()) + ", movable:" + this.isMovable
+				+ ", domain:" + this.domain + "}";
 	}
 }

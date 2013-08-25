@@ -3,19 +3,18 @@ package frigengine.core.scene;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
-import frigengine.core.*;
 import frigengine.core.exceptions.data.*;
 import frigengine.core.util.Initializable;
 
 public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 	// Attributes
-	private int depth;
+	private int elevation;
 	private int priority;
 	private Animation animation;
 
 	// Constructors and initialization
 	public SceneLayer() {
-		this.depth = 0;
+		this.elevation = 0;
 		this.priority = 0;
 	}
 	@Override
@@ -27,10 +26,10 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 
 		// depth
 		try {
-			this.depth = xmlElement.getIntAttribute("depth", this.getDepth());
+			this.elevation = xmlElement.getIntAttribute("elevation", this.getElevation());
 		} catch (SlickXMLException e) {
-			throw new AttributeFormatException(xmlElement.getName(), "depth",
-					xmlElement.getAttribute("depth"));
+			throw new AttributeFormatException(xmlElement.getName(), "elevation",
+					xmlElement.getAttribute("elevation"));
 		}
 		
 		// priority
@@ -57,8 +56,8 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 	}
 
 	// Getters and setters
-	public int getDepth() {
-		return depth;
+	public int getElevation() {
+		return elevation;
 	}
 	public int getPriority() {
 		return priority;
@@ -70,12 +69,12 @@ public class SceneLayer implements Comparable<SceneLayer>, Initializable {
 	// Utilities
 	@Override
 	public String toString() {
-		return "layer: depth-" + this.getDepth() + " priority-" + this.getPriority();
+		return "layer: depth-" + this.getElevation() + " priority-" + this.getPriority();
 	}
 	@Override
 	public int compareTo(SceneLayer other) {
-		if (this.depth != other.depth) {
-			return this.depth - other.depth;
+		if (this.elevation != other.elevation) {
+			return this.elevation - other.elevation;
 		} else {
 			return this.priority - other.priority;
 		}

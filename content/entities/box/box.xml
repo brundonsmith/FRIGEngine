@@ -3,7 +3,13 @@
 	<SpriteComponent defaultanimation="box_animation_1" width="40" height="40">
 		<Animation id="box_animation_1" sprite="content/entities/box/animation.png" rows="2" cols="2" looping="true" duration="2000"/>
 	</SpriteComponent>
-	<ColliderComponent collidable="true" movable="false">
+	<ColliderComponent collisiongroups="ground" movable="false">
 		<Rectangle width="40.0" height="40.0"/>
 	</ColliderComponent>
+	<TriggerComponent>
+		<BattleStartEvent battle="battle1"></BattleStartEvent>
+	</TriggerComponent>
+	<MovementComponent></MovementComponent>
+	<BattleComponent health="100" attack="5" defense="3" magicdefense="1" resilience="2" speed="4"></BattleComponent>
+	<DashComponent></DashComponent>
 </Entity>

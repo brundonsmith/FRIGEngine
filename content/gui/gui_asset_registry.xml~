@@ -1,0 +1,5 @@
+<gui_assets>
+	<Animation id="BasicLinearMenu" sprite="content/gui/Default.png" rows="1" cols="1"/>
+	<Animation id="SpeechDialog" sprite="content/gui/Parchment.png" rows="1" cols="1"/>
+</gui_assets>
+	

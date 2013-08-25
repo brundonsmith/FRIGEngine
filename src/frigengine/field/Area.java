@@ -1,7 +1,5 @@
 package frigengine.field;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collections;
 
 import org.lwjgl.input.Keyboard;
@@ -9,11 +7,12 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
+import frigengine.battle.*;
 import frigengine.core.component.*;
 import frigengine.core.exceptions.data.*;
 import frigengine.core.gui.*;
 import frigengine.core.scene.*;
-import frigengine.core.util.Initializable;
+import frigengine.core.util.*;
 
 public class Area extends Scene implements Initializable {
 	// Attributes
@@ -22,11 +21,6 @@ public class Area extends Scene implements Initializable {
 	// Constructors and initialization
 	public Area(String id) {
 		super(id);
-		this.width = 1;
-		this.height = 1;
-		this.currentCamera = "";
-		this.layers = new ArrayList<SceneLayer>();
-		this.guiStack = new ArrayDeque<GUIFrame>();
 		this.name = this.getId();
 	}
 	@Override
@@ -80,7 +74,7 @@ public class Area extends Scene implements Initializable {
 					newEntity = new Entity(child.getAttribute("id"));
 				}
 				newEntity.init(child);
-				this.addEntityToArea(newEntity.getId());
+				this.addEntity(newEntity.getId());
 			}
 		}
 		
@@ -89,6 +83,24 @@ public class Area extends Scene implements Initializable {
 		// name
 		this.name = xmlElement.getAttribute("name", this.name);
 	}
+	@Override
+	public void onGainFocus(Scene previousScene) {
+		if(previousScene instanceof Battle) {
+			for(Entity e : Entity.getEntities(this)) {
+				e.revertState("field");
+			}
+		}
+	}
+	@Override
+	public void onLoseFocus(Scene newScene) {
+		if(newScene instanceof Battle) {
+			for(Entity e : Entity.getEntities(this)) {
+				e.saveState("field", PositionComponent.class, SpriteComponent.class, MovementComponent.class);
+			}
+		}
+	}
+	
+	// Main loop methods
 	@Override
 	public void update(int delta, Input input) {
 		boolean timeBlocked = false;
@@ -119,6 +131,9 @@ public class Area extends Scene implements Initializable {
 				inputBlocked = true;
 			}
 		}
+		
+		// ParticleEffects
+		this.particleSystem.update(timeBlocked ? 0 : delta);
 
 		// Entities
 		for (Entity entity : Entity.getEntities(this)) {
@@ -134,13 +149,5 @@ public class Area extends Scene implements Initializable {
 	// Getters and setters
 	public String getName() {
 		return name;
-	}
-
-	// Commands
-	private void addEntityToArea(String entityId) {
-		this.addEntityToScene(entityId);
-	}
-	private void removeEntityFromArea(String entityId) {
-		this.removeEntityFromScene(entityId);
 	}
 }

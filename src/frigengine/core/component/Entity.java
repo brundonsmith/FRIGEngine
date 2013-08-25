@@ -2,21 +2,19 @@ package frigengine.core.component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.xml.XMLElement;
 
-import frigengine.battle.BattleComponent;
+import frigengine.battle.*;
 import frigengine.core.exceptions.component.*;
 import frigengine.core.exceptions.data.*;
 import frigengine.core.idable.*;
 import frigengine.core.scene.*;
-import frigengine.core.util.Initializable;
-import frigengine.field.CharacterComponent;
-import frigengine.field.ColliderComponent;
-import frigengine.field.PlayerControllerComponent;
-import frigengine.field.TriggerComponent;
+import frigengine.core.util.*;
+import frigengine.field.*;
 
 
 public class Entity extends IDable<String> implements Initializable, Iterable<Component> {
@@ -30,7 +28,8 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 		CameraComponent.class,
 		PlayerControllerComponent.class,
 		TriggerComponent.class,
-		MovementComponent.class
+		MovementComponent.class,
+		DashComponent.class
 	};
 	
 	// Static
@@ -75,7 +74,7 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 	public static Collection<Entity> getEntities(Scene scene, Class<? extends Component> component) {
 		Collection<Entity> results = new ArrayList<Entity>();
 		for(Entity e : entities) {
-			if(e.scene.equals(scene) && e.hasComponent(component)) {
+			if(e.scene != null && e.scene.equals(scene) && e.hasComponent(component)) {
 				results.add(e);
 			}
 		}
@@ -95,12 +94,14 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 	private String name;
 	private Scene scene;
 	private IDableCollection<Class<? extends Component>, Component> components;
+	private Hashtable<String, IDableCollection<Class<? extends Component>, Component>> saveStates;
 	
 	// Constructors and initialization
-	public Entity() {
+ 	public Entity() {
 		this.setId("entity" + entities.size());
 		this.name = this.getId();
 		this.components = new IDableCollection<Class<? extends Component>, Component>();
+		this.saveStates = new Hashtable<String, IDableCollection<Class<? extends Component>, Component>>();
 
 		Entity.entities.add(this);
 	}
@@ -108,6 +109,7 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 		this.setId(id);
 		this.name = this.getId();
 		this.components = new IDableCollection<Class<? extends Component>, Component>();
+		this.saveStates = new Hashtable<String, IDableCollection<Class<? extends Component>, Component>>();
 
 		Entity.entities.add(this);
 	}
@@ -125,13 +127,14 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 		this.name = xmlElement.getAttribute("name", this.getId());
 		
 		// components
+		Collection<Component> newComponents = new ArrayList<Component>();
 		for (Class<?> componentType : knownComponents) {
 			if (xmlElement.getChildrenByName(componentType.getSimpleName()).size() > 0) {
 				XMLElement componentElement = xmlElement.getChildrenByName(componentType.getSimpleName()).get(0);
 
 				Component newComponent;
 
-				// TODO Figure out a way to dynamically initialize entities using only the knowncomponents list
+				// TODO Figure out a way to dynamically initialize entities using only the knownComponents list
 				/*
 				if(this.hasComponent((Class<? extends Component>)componentType)) {
 					newComponent = this.getComponent((Class<? extends Component>)componentType);
@@ -193,15 +196,22 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 					} else {
 						newComponent = new MovementComponent();
 					}
+				} else if (componentElement.getName().equals(DashComponent.class.getSimpleName())) {
+					if(this.hasComponent(DashComponent.class)) {
+						newComponent = this.getComponent(DashComponent.class);
+					} else {
+						newComponent = new DashComponent();
+					}
 				} else {
 					throw new InvalidTagException("valid component name",
 							componentElement.getName());
 				}
-
+				
 				newComponent.init(componentElement);
-				this.addComponent(newComponent);
+				newComponents.add(newComponent);
 			}
 		}
+		this.addComponents(newComponents);
 	}
 	
 	// Main loop methods
@@ -230,7 +240,7 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 	}
 	public void addComponent(Component component) {
 		if(this.getIsValidAddition(component)) {
-			component.setParent(this);
+			component.setContainingEntity(this);
 			this.components.add(component);
 		} else {
 			throw new ComponentRequirementException("Cannot add " + component.getClass().getSimpleName() + " to Entity " + this.getId() + " because not all required components exist");
@@ -239,7 +249,7 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 	public void addComponents(Collection<? extends Component> components) {
 		if(this.getIsValidAddition(components)) {
 			for(Component c : components) {
-				c.setParent(this);
+				c.setContainingEntity(this);
 				this.components.add(c);
 			}
 		} else {
@@ -248,7 +258,7 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 	}
 	public void removeComponent(Class<? extends Component> component) {
 		if(this.getIsValidRemoval(component)) {
-			this.components.get(component).setParent(null);
+			this.components.get(component).setContainingEntity(null);
 			this.components.remove(component);
 		} else {
 			throw new ComponentRequirementException("Cannot remove " + component.getSimpleName() + " from Entity " + this.getId() + " because other component(s) depend on it");
@@ -305,6 +315,34 @@ public class Entity extends IDable<String> implements Initializable, Iterable<Co
 			}
 		}
 		return true;
+	}
+	
+	// Operations
+	@SuppressWarnings("unchecked")
+	public final void saveState(String stateId) {
+		this.saveState(stateId, (Class<? extends Component>[])Entity.knownComponents);
+	}
+	@SafeVarargs
+	public final void saveState(String stateId, Class<? extends Component> ... components) {
+		IDableCollection<Class<? extends Component>, Component> state = new IDableCollection<Class<? extends Component>, Component>();
+		
+		for(Class<? extends Component> component : components) {
+			if(this.hasComponent(component)) {
+				state.add(this.getComponent(component).clone());
+			}
+		}
+		
+		this.saveStates.put(stateId, state);
+	}
+	public void revertState(String stateId) {
+		if(this.saveStates.containsKey(stateId)) {
+			for(Component component : this.saveStates.get(stateId)) {
+				this.addComponent(component.clone());
+			}
+		}
+	}
+	public void deleteState(String stateId) {
+		this.saveStates.remove(stateId);
 	}
 	
 	// Utilities

@@ -30,7 +30,7 @@ public class ChangeAreaEvent extends AbstractTriggeredEvent {
 	@Override
 	public void execute(Entity catalyst) {
 		FRIGGame.changeArea(Entity.getEntity(this.destinationEntityId).getScene().getId());
-		catalyst.setScene(Entity.getEntity(this.destinationEntityId).getScene());
+		Entity.getEntity(this.destinationEntityId).getScene().addEntity(catalyst);
 		catalyst.getComponent(PositionComponent.class).setPosition(Entity.getEntity(this.destinationEntityId).getComponent(PositionComponent.class).getPosition());
 	}
 }

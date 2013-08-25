@@ -10,14 +10,13 @@ import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
-import frigengine.core.AnimationFinishedListener;
 import frigengine.core.component.*;
 import frigengine.core.exceptions.data.*;
 import frigengine.core.geom.*;
 import frigengine.core.idable.*;
 
 
-public class SpriteComponent extends Component implements AnimationFinishedListener {
+public class SpriteComponent extends Component implements AnimationFinishedSubscriber {
 	// Required components
 	@Override
 	public  Collection<Class<? extends Component>> requiredComponents() {
@@ -27,18 +26,33 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 	}
 	
 	// Attributes
-	private Rectangle presence;
 	private String activeAnimation;
 	private String continuousAnimation;
+	private Rectangle domain;
 	private IDableCollection<String, Animation> animations;
 	
 	// Constructors and initialization
 	public SpriteComponent() {
 		this.activeAnimation = "";
 		this.continuousAnimation = Animation.PLACEHOLDER_ID;
-		this.presence = new Rectangle(0,0,0,0);
+		this.domain = new Rectangle(0,0,0,0);
 		this.animations = new IDableCollection<String, Animation>();
 		this.animations.add(Animation.getPlaceholder());
+	}
+	private SpriteComponent(SpriteComponent other) {
+		super(other);
+		
+		this.activeAnimation = other.activeAnimation;
+		this.continuousAnimation = other.continuousAnimation;
+		this.domain = new Rectangle(other.domain.getX(), other.domain.getY(), other.domain.getWidth(), other.domain.getHeight());
+		this.animations = new IDableCollection<String, Animation>();
+		for(Animation a : other.animations) {
+			this.animations.add(a.clone());
+		}
+	}
+	@Override
+	public SpriteComponent clone() {
+		return new SpriteComponent(this);
 	}
 	@Override
 	public void init(XMLElement xmlElement) {
@@ -52,27 +66,27 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 		// continuousAnimation
 		this.continuousAnimation =xmlElement.getAttribute("defaultanimation", this.continuousAnimation);
 
-		// presence
+		// domain
 		try {
-			this.presence.setX((float) xmlElement.getDoubleAttribute("offsetx", this.presence.getX()));
+			this.domain.setX((float) xmlElement.getDoubleAttribute("offsetx", this.domain.getX()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "offsetx",
 					xmlElement.getAttribute("offsetx"));
 		}
 		try {
-			this.presence.setY((float) xmlElement.getDoubleAttribute("offsety", this.presence.getY()));
+			this.domain.setY((float) xmlElement.getDoubleAttribute("offsety", this.domain.getY()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "offsety",
 					xmlElement.getAttribute("offsety"));
 		}
 		try {
-			((Rectangle)this.presence).setWidth((float) xmlElement.getDoubleAttribute("width", this.presence.getWidth()));
+			((Rectangle)this.domain).setWidth((float) xmlElement.getDoubleAttribute("width", this.domain.getWidth()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "width",
 					xmlElement.getAttribute("width"));
 		}
 		try {
-			((Rectangle)this.presence).setHeight((float) xmlElement.getDoubleAttribute("height", this.presence.getHeight()));
+			((Rectangle)this.domain).setHeight((float) xmlElement.getDoubleAttribute("height", this.domain.getHeight()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "height",
 					xmlElement.getAttribute("height"));
@@ -84,7 +98,7 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 
 			Animation newAnimation = new Animation();
 			newAnimation.init(child);
-			newAnimation.addFinishedListener(this);
+			newAnimation.addFinishedSubscriber(this);
 			this.animations.add(newAnimation);
 		}
 	}
@@ -131,26 +145,24 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 	}
 	
 	// External
-	public Rectangle getLocalPresence() {
-		if(this.presence != null && this.presence.getWidth() > 0 && this.presence.getHeight() > 0) {
-			Shape p = this.presence;
-			return new Rectangle(p.getMinX(), p.getMinY(), p.getWidth(), p.getHeight());
+	public Rectangle getLocalDomain() {
+		if(this.domain != null && this.domain.getWidth() > 0 && this.domain.getHeight() > 0) {
+			return this.domain;
 		} else {
-			Shape p =  this.getCurrentAnimation().getPresence();
-			return new Rectangle(p.getMinX(), p.getMinY(), p.getWidth(), p.getHeight());
+			return this.getCurrentAnimation().getDomain();
 		}
 	}
-	public Rectangle getWorldPresence() {
-		if(this.presence.getWidth() > 0 && this.presence.getHeight() > 0) {
-			Shape relative = this.presence.transform(Transform.createTranslateTransform(0,0));
-			relative.setCenterX(getComponent(PositionComponent.class).getX() + this.presence.getX());
-			relative.setCenterY(getComponent(PositionComponent.class).getY() + this.presence.getY());
-			return new Rectangle(relative.getMinX(), relative.getMinY(), relative.getWidth(), relative.getHeight());
+	public Rectangle getWorldDomain() {
+		if(this.domain.getWidth() > 0 && this.domain.getHeight() > 0) {
+			Rectangle relative = this.domain.transform(Transform.createTranslateTransform(0,0));
+			relative.setCenterX(getComponent(PositionComponent.class).getX() + this.domain.getX());
+			relative.setCenterY(getComponent(PositionComponent.class).getY() + this.domain.getY());
+			return relative;
 		} else {
-			Shape relative = this.getCurrentAnimation().getPresence().transform(Transform.createTranslateTransform(0,0));
+			Rectangle relative = this.getCurrentAnimation().getDomain().transform(Transform.createTranslateTransform(0,0));
 			relative.setCenterX(getComponent(PositionComponent.class).getX());
 			relative.setCenterY(getComponent(PositionComponent.class).getY());
-			return new Rectangle(relative.getMinX(), relative.getMinY(), relative.getWidth(), relative.getHeight());
+			return relative;
 		}
 	}
 	public Animation getActiveAnimation() {
@@ -160,16 +172,15 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 			return null;
 		}
 	}
-	public void playAnimation(String animation) {
-		this.setActiveAnimation(animation);
+	public void playAnimation(String animationId) {
+		this.setActiveAnimation(animationId);
 	}
-	public void playAnimation(String animation, int duration) {
-		Animation anim = this.animations.get(animation);
-		
-		for(int i = 0; i < anim.getFrameCount(); i++) {
-			anim.setDuration(i, duration / anim.getFrameCount());
+	public void playAnimation(String animationId, int duration) {
+		Animation animation = this.animations.get(animationId);
+		for(int i = 0; i < animation.getFrameCount(); i++) {
+			animation.setDuration(i, duration / animation.getFrameCount());
 		}
-		this.setActiveAnimation(animation);
+		this.setActiveAnimation(animationId);
 	}
 	public void killAnimation() {
 		if(this.hasActiveAnimation()) {
@@ -180,8 +191,8 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 	public Animation getLoopingAnimation() {
 		return this.getContinuousAnimation();
 	}
-	public void loopAnimation(String animation) {
-		this.setContinuousAnimation(animation);
+	public void loopAnimation(String animationId) {
+		this.setContinuousAnimation(animationId);
 	}
 	public Animation getCurrentAnimation() {
 		return this.hasActiveAnimation() ? this.getActiveAnimation() : this.getContinuousAnimation();
@@ -195,7 +206,11 @@ public class SpriteComponent extends Component implements AnimationFinishedListe
 	
 	// Events
 	@Override
-	public void animationFinished(Animation source) {
+	public void subscribeTo(Animation reporter) {
+		reporter.addFinishedSubscriber(this);
+	}
+	@Override
+	public void reportedAnimationFinished(Animation source) {
 		if(source.getId().equals(this.activeAnimation)) {
 			this.killAnimation();
 		}

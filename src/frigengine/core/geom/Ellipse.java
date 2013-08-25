@@ -59,22 +59,22 @@ public class Ellipse extends org.newdawn.slick.geom.Ellipse implements Initializ
 	}
 	
 	// Getters and setters
+	private org.newdawn.slick.geom.Rectangle boundingRectangle = new org.newdawn.slick.geom.Rectangle(0,0,0,0);
 	@Override
 	public org.newdawn.slick.geom.Rectangle getBoundingRectangle() {
-		return new org.newdawn.slick.geom.Rectangle(
-				this.getMinX(),
-				this.getMinY(),
-				this.getWidth(),
-				this.getHeight()
-				);
+		boundingRectangle.setX(this.getMinX());
+		boundingRectangle.setY(this.getMinY());
+		boundingRectangle.setWidth(this.getWidth());
+		boundingRectangle.setHeight(this.getHeight());
+		return boundingRectangle;
 	}
+	private org.newdawn.slick.geom.Ellipse boundingEllipse = new org.newdawn.slick.geom.Ellipse(0,0,0,0);
 	@Override
 	public org.newdawn.slick.geom.Ellipse getBoundingEllipse() {
-		return new org.newdawn.slick.geom.Ellipse(
-				this.getCenterX(),
-				this.getCenterY(),
-				this.getWidth() / 2,
-				this.getHeight() / 2
-				);
+		boundingEllipse.setCenterX(this.getCenterX());
+		boundingEllipse.setCenterY(this.getCenterY());
+		boundingEllipse.setRadius1(this.getWidth() / 2);
+		boundingEllipse.setRadius2(this.getHeight() / 2);
+		return boundingEllipse;
 	}
 }

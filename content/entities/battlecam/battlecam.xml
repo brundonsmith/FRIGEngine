@@ -1,0 +1,5 @@
+<Entity>
+	<PositionComponent/>
+	<CameraComponent width="160" height="90"/>
+	<MovementComponent></MovementComponent>
+</Entity>

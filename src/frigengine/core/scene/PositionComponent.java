@@ -20,10 +20,21 @@ public class PositionComponent extends Component {
 	
 	// Attributes
 	private Point position;
+	private int elevation;
 
 	// Constructors and initialization
 	public PositionComponent() {
 		this.position = new Point(0, 0);
+		this.elevation = 0;
+	}
+	private PositionComponent(PositionComponent other) {
+		super(other);
+		
+		this.position = new Point(other.position.getX(), other.position.getY());
+		this.elevation = other.elevation;
+	}
+	public PositionComponent clone() {
+		return new PositionComponent(this);
 	}
 	@Override
 	public void init(XMLElement xmlElement) {
@@ -43,17 +54,32 @@ public class PositionComponent extends Component {
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "y", xmlElement.getAttribute("y"));
 		}
+		
+		// elevation
+		try {
+			this.elevation = xmlElement.getIntAttribute("elevation", this.elevation);
+		} catch (SlickXMLException e) {
+			throw new AttributeFormatException(xmlElement.getName(), "elevation", xmlElement.getAttribute("elevation"));
+		}
 	}
 
 	// Getters and setters
 	public Point getPosition() {
 		return this.position;
 	}
+	public Vector2f getPositionVector() {
+		return new Vector2f(this.position.getX(), this.position.getY());
+	}
 	public void setPosition(Point position) {
 		this.position = position;
 	}
+	public void setPosition(float x, float y) {
+		this.position.setX(x);
+		this.position.setY(y);
+	}
 	public void setPosition(float[] position) {
-		this.position = new Point(position[0], position[1]);
+		this.position.setX(position[0]);
+		this.position.setY(position[1]);
 	}
 	public float getX() {
 		return this.position.getX();
@@ -67,23 +93,30 @@ public class PositionComponent extends Component {
 	public void setY(float y) {
 		this.position.setY(y);
 	}
+	public int getElevation() {
+		return this.elevation;
+	}
+	public void setElevation(int elevation) {
+		this.elevation = elevation;
+	}
 	
 	// Operations
 	public void translate(float x, float y) {
-		this.position = new Point(this.position.getX() + x, this.position.getY() + y);
+		this.position.setX(this.position.getX() + x);
+		this.position.setY(this.position.getY() + y);
 	}
 	public void translate(Point difference) {
-		this.position = new Point(this.position.getX() + difference.getX(), this.position.getY()
-				+ difference.getY());
+		this.position.setX(this.position.getX() + difference.getX());
+		this.position.setY(this.position.getY()	+ difference.getY());
 	}
 	public void translate(Vector2f difference) {
-		this.position = new Point(this.position.getX() + difference.getX(), this.position.getY()
-				+ difference.getY());
+		this.position.setX(this.position.getX() + difference.getX());
+		this.position.setY(this.position.getY()	+ difference.getY());
 	}
 
 	// Utilities
 	@Override
 	public String toString() {
-		return "(" + this.position.getX() + ", " + this.position.getY() + ")";
+		return this.getClass().getSimpleName() + ": position=(" + this.position.getX() + ", " + this.position.getY() + "); elevation=" + this.elevation;
 	}
 }

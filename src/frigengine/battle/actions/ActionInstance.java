@@ -29,7 +29,7 @@ public class ActionInstance {
 	}
 	
 	// Operations
-	public void execute() {
+	public void apply() {
 		this.action.apply(source, targets);
 	}
 }

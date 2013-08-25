@@ -73,6 +73,33 @@ public class CharacterComponent extends Component {
 		this.animationMoveE = Animation.PLACEHOLDER_ID;
 		this.animationMoveW = Animation.PLACEHOLDER_ID;
 	}
+	private CharacterComponent(CharacterComponent other) {
+		this.moveVector = other.moveVector.copy();
+		this.moveSpeed = other.moveSpeed;
+		this.direction = other.direction;
+		
+		this.animationIdleNW = other.animationIdleNW;
+		this.animationIdleN = other.animationIdleN;
+		this.animationIdleNE = other.animationIdleNE;
+		this.animationIdleSW = other.animationIdleSW;
+		this.animationIdleS = other.animationIdleS;
+		this.animationIdleSE = other.animationIdleSE;
+		this.animationIdleE = other.animationIdleE;
+		this.animationIdleW = other.animationIdleW;
+
+		this.animationMoveNW = other.animationMoveNW;
+		this.animationMoveN = other.animationMoveN;
+		this.animationMoveNE = other.animationMoveNE;
+		this.animationMoveSW = other.animationMoveSW;
+		this.animationMoveS = other.animationMoveS;
+		this.animationMoveSE = other.animationMoveSE;
+		this.animationMoveE = other.animationMoveE;
+		this.animationMoveW = other.animationMoveW;
+	}
+	@Override
+	public CharacterComponent clone() {
+		return new CharacterComponent(this);
+	}
 	@Override
 	public void init(XMLElement xmlElement) {
 		// Check element name
@@ -157,7 +184,7 @@ public class CharacterComponent extends Component {
 		if (this.getIsMoving()) {
 			getComponent(PositionComponent.class).translate(this.moveVector.copy().scale((float) delta / 1000));
 		}
-		this.moveVector = new Vector2f();
+		this.moveVector.set(0, 0);
 	}
 	
 	// Getters and setters
@@ -205,7 +232,8 @@ public class CharacterComponent extends Component {
 	public void move(double direction) {
 		this.direction = direction;
 
-		this.moveVector = new Vector2f(this.direction);
+		this.moveVector.set(0, 1);
+		this.moveVector.setTheta(this.direction);
 		this.moveVector.normalise();
 		this.moveVector.scale(this.moveSpeed);
 	}
@@ -213,7 +241,8 @@ public class CharacterComponent extends Component {
 		this.direction = direction;
 		this.moveSpeed = moveSpeed;
 
-		this.moveVector = new Vector2f(this.direction);
+		this.moveVector.set(0, 1);
+		this.moveVector.setTheta(this.direction);
 		this.moveVector.normalise();
 		this.moveVector.scale(this.moveSpeed);
 	}
@@ -221,7 +250,7 @@ public class CharacterComponent extends Component {
 	// Utilities
 	@Override
 	public String toString() {
-		return this.getId() + ": moveSpeed-" + this.moveSpeed + " direction-" + this.direction
-				+ " movementVector-" + this.moveVector;
+		return this.getClass().getSimpleName() + ": moveSpeed=" + this.moveSpeed + " direction=" + this.direction
+				+ " movementVector=" + this.moveVector;
 	}
 }

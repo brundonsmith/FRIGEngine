@@ -10,6 +10,10 @@ public abstract class IDable<E> {
 		this.id = null;
 		this.idableCollection = null;
 	}
+	protected IDable(IDable<E> other) {
+		this.id = other.id;
+		this.idableCollection = other.idableCollection;
+	}
 	
 	// Getters and setters
 	public E getId() {

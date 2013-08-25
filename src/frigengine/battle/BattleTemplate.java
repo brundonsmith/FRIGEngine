@@ -43,8 +43,15 @@ public class BattleTemplate extends IDable<String> implements Initializable {
 		Collections.sort(this.layers);
 
 		// enemies
-		for (int i = 0; i < xmlElement.getChildrenByName(Entity.class.getSimpleName()).size(); i++) {
-			XMLElement child = xmlElement.getChildrenByName(Entity.class.getSimpleName()).get(i);
+		XMLElement enemiesList;
+		if(xmlElement.getChildrenByName("enemies").size() == 0) {
+			throw new MissingElementException("enemies", xmlElement.getName());
+		} else {
+			enemiesList = xmlElement.getChildrenByName("enemies").get(0);
+		}
+		
+		for (int i = 0; i < enemiesList.getChildrenByName(Entity.class.getSimpleName()).size(); i++) {
+			XMLElement child = enemiesList.getChildrenByName(Entity.class.getSimpleName()).get(i);
 			
 			if(child.getAttribute("id") != null) {
 				Entity newEntity;

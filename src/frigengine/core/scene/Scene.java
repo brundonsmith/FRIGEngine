@@ -4,43 +4,62 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
 import org.newdawn.slick.Font;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Transform;
+import org.newdawn.slick.particles.ParticleSystem;
 
-import frigengine.core.*;
+import frigengine.core.FRIGGame;
 import frigengine.core.component.*;
+import frigengine.core.geom.*;
 import frigengine.core.gui.*;
 import frigengine.core.idable.*;
 
-public abstract class Scene extends IDable<String> implements GUICloseListener {
+public abstract class Scene extends IDable<String> implements GUICloseSubscriber, GUIContext {
 	// Attributes
 	protected float width;
 	protected float height;
 	protected String currentCamera;
 	protected List<SceneLayer> layers;
 	protected Deque<GUIFrame> guiStack;
+	protected ParticleSystem particleSystem;
 
 	// Constructors and initialization
 	public Scene(String id) {
 		this.setId(id);
+		this.width = 1;
+		this.height = 1;
+		this.currentCamera = "";
+		this.layers = new ArrayList<SceneLayer>();
+		this.guiStack = new LinkedList<GUIFrame>();
+		this.particleSystem = new ParticleSystem(Animation.getPlaceholder().getImage(0));
+		
+		// TEMPORARY ////////////////////////////////////////
+		//this.particleSystem.addEmitter(new FireEmitter());
 	}
+	public abstract void onGainFocus(Scene previousScene);
+	public abstract void onLoseFocus(Scene newScene);
 	
 	// Main loop methods
 	public abstract void update(int delta, Input input);
-	public void render(org.newdawn.slick.Graphics g) {
+	public void render(Graphics g) {
+		// Background layers
 		for (SceneLayer layer : layers) {
-			if (layer.getDepth() <= 0) {
-				this.renderLayer(g, layer.getAnimation(), layer.getDepth());
+			if (layer.getElevation() <= 0) {
+				this.renderLayer(g, layer.getAnimation(), layer.getElevation());
 			} else {
 				break;
 			}
 		}
 
+		// Entities
 		List<Entity> entities = new ArrayList<Entity>(Entity.getEntities(this, SpriteComponent.class));
 		Collections.sort(entities, new Comparator<Entity>(){
 			@Override
@@ -49,97 +68,168 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 			}
 		});
 		for (Entity entity : entities) {
-			this.renderObject(g, entity.getComponent(SpriteComponent.class).getCurrentAnimation(), entity.getComponent(SpriteComponent.class).getWorldPresence());
+			this.renderObject(g, entity.getComponent(SpriteComponent.class).getCurrentAnimation(), entity.getComponent(SpriteComponent.class).getWorldDomain(), entity.getComponent(PositionComponent.class).getElevation());
 		}
 
+		// Foreground layers
 		for (SceneLayer layer : layers) {
-			if (layer.getDepth() > 0) {
-				this.renderLayer(g, layer.getAnimation(), layer.getDepth());
+			if (layer.getElevation() > 0) {
+				this.renderLayer(g, layer.getAnimation(), layer.getElevation());
 			}
 		}
+
+		// Particle effects
+		this.particleSystem.render();
 
 		// GUI
 		for (GUIFrame frame : guiStack) {
 			frame.render(g, this);
 		}
 	}
-	public void renderObject(org.newdawn.slick.Graphics g, Image image, Rectangle presence) {
-		Rectangle drawPresence = this.cameraTransform(presence);
+	public void renderObject(Graphics g, Image image, Rectangle domain) {
+		Rectangle drawDomain = domain.transform(this.getCurrentCamera().getComponent(CameraComponent.class).getTransform());
 		g.drawImage(
 				image,
-				drawPresence.getMinX(),
-				drawPresence.getMinY(),
-				drawPresence.getMaxX(),
-				drawPresence.getMaxY(),
+				drawDomain.getMinX(),
+				drawDomain.getMinY(),
+				drawDomain.getMaxX(),
+				drawDomain.getMaxY(),
 				0,
 				0,
 				image.getWidth(),
 				image.getHeight());
 	}
-	public void renderObject(org.newdawn.slick.Graphics g, Animation animation, Rectangle presence) {
-		Rectangle drawPresence = this.cameraTransform(presence);
+	public void renderObject(Graphics g, Image image, Rectangle domain, int elevation) {
+		Rectangle drawDomain = domain.transform(this.getCurrentCamera().getComponent(CameraComponent.class).getTransform(elevation));
+		g.drawImage(
+				image,
+				drawDomain.getMinX(),
+				drawDomain.getMinY(),
+				drawDomain.getMaxX(),
+				drawDomain.getMaxY(),
+				0,
+				0,
+				image.getWidth(),
+				image.getHeight());
+	}
+	public void renderObject(Graphics g, Animation animation, Rectangle domain) {
+		Rectangle drawDomain = domain.transform(this.getCurrentCamera().getComponent(CameraComponent.class).getTransform());
 		Image image = animation.getCurrentFrame();
 		g.drawImage(
 				image,
-				drawPresence.getMinX(),
-				drawPresence.getMinY(),
-				drawPresence.getMaxX(),
-				drawPresence.getMaxY(),
+				drawDomain.getMinX(),
+				drawDomain.getMinY(),
+				drawDomain.getMaxX(),
+				drawDomain.getMaxY(),
 				0,
 				0,
 				image.getWidth(),
 				image.getHeight());
 	}
-	public void renderLayer(org.newdawn.slick.Graphics g, Animation animation, int depth) {
-		Rectangle drawPresence = new Rectangle(this.getPresence().getX(), this.getPresence().getY(), this.getPresence().getWidth(), this.getPresence().getHeight());
-		float areaCenterX = drawPresence.getCenterX();
-		float areaCenterY = drawPresence.getCenterY();
+	public void renderObject(Graphics g, Animation animation, Rectangle domain, int elevation) {
+		Rectangle drawDomain = domain.transform(this.getCurrentCamera().getComponent(CameraComponent.class).getTransform(elevation));
+		Image image = animation.getCurrentFrame();
+		g.drawImage(
+				image,
+				drawDomain.getMinX(),
+				drawDomain.getMinY(),
+				drawDomain.getMaxX(),
+				drawDomain.getMaxY(),
+				0,
+				0,
+				image.getWidth(),
+				image.getHeight());
+	}
+	private Rectangle layerDrawDomain = new Rectangle(0,0,0,0);
+	public void renderLayer(Graphics g, Animation animation, int elevation) {
+		/*
+		float areaCenterX = drawDomain.getCenterX();
+		float areaCenterY = drawDomain.getCenterY();
 		
-		float scale = (float)Math.pow(2, depth);
-		drawPresence.scaleGrow(scale, scale);
-		drawPresence.setCenterX(areaCenterX - depth * (this.getCurrentCamera().getComponent(CameraComponent.class).getCenter().getCenterX() - areaCenterX));
-		drawPresence.setCenterY(areaCenterY - depth * (this.getCurrentCamera().getComponent(CameraComponent.class).getCenter().getCenterY() - areaCenterY));
-		drawPresence = cameraTransform(drawPresence);
+		float scale = (float)Math.pow(2, elevation);
+		drawDomain.scaleGrow(scale, scale);
+		drawDomain.setCenterX(areaCenterX - elevation * (this.getCurrentCamera().getComponent(CameraComponent.class).getCenter().getCenterX() - areaCenterX));
+		drawDomain.setCenterY(areaCenterY - elevation * (this.getCurrentCamera().getComponent(CameraComponent.class).getCenter().getCenterY() - areaCenterY));
+		drawDomain = cameraTransform(drawDomain);
+		*/
+		
+		layerDrawDomain.setX(this.getDomain().getX());
+		layerDrawDomain.setY(this.getDomain().getY());
+		layerDrawDomain.setWidth(this.getDomain().getWidth());
+		layerDrawDomain.setHeight(this.getDomain().getHeight());
+		layerDrawDomain = layerDrawDomain.transform(this.getCurrentCamera().getComponent(CameraComponent.class).getTransform(elevation));
 		
 		Image image = animation.getCurrentFrame();
 		g.drawImage(image,
-				drawPresence.getMinX(),
-				drawPresence.getMinY(),
-				drawPresence.getMaxX(),
-				drawPresence.getMaxY(),
+				layerDrawDomain.getMinX(),
+				layerDrawDomain.getMinY(),
+				layerDrawDomain.getMaxX(),
+				layerDrawDomain.getMaxY(),
 				0,
 				0,
 				image.getWidth(),
 				image.getHeight());
 	}
-	public void renderObjectForeground(org.newdawn.slick.Graphics g, Animation animation, Rectangle presence) {
+
+	// GUIContext
+	@Override
+	public void drawShape(Graphics g, Shape shape) {
+		Shape realShape = shape.transform(Transform.createScaleTransform(FRIGGame.getScreenWidth(), FRIGGame.getScreenHeight()));
+		g.draw(realShape);
+	}
+	@Override
+	public void fillShape(Graphics g, Shape shape) {
+		Shape realShape = shape.transform(Transform.createScaleTransform(FRIGGame.getScreenWidth(), FRIGGame.getScreenHeight()));
+		g.fill(realShape);
+	}
+	@Override
+	public void renderObjectForeground(Graphics g, Image image, Rectangle domain) {
+		Rectangle realDomain = domain.transform(Transform.createScaleTransform(FRIGGame.getScreenWidth(), FRIGGame.getScreenHeight()));
+		
+		g.drawImage(
+				image,
+				realDomain.getMinX(),
+				realDomain.getMinY(),
+				realDomain.getMaxX(),
+				realDomain.getMaxY(),
+				0,
+				0,
+				image.getWidth(),
+				image.getHeight());
+	}
+	@Override
+	public void renderObjectForeground(Graphics g, Animation animation, Rectangle domain) {
+		Rectangle realDomain = domain.transform(Transform.createScaleTransform(FRIGGame.getScreenWidth(), FRIGGame.getScreenHeight()));
 		Image image = animation.getCurrentFrame();
 		g.drawImage(
 				image,
-				presence.getMinX(),
-				presence.getMinY(),
-				presence.getMaxX(),
-				presence.getMaxY(),
+				realDomain.getMinX(),
+				realDomain.getMinY(),
+				realDomain.getMaxX(),
+				realDomain.getMaxY(),
 				0,
 				0,
 				image.getWidth(),
 				image.getHeight());
 	}
-	public void renderStringBoxForeground(org.newdawn.slick.Graphics g, String text, Rectangle box, Font font) {
+	@Override
+	public void renderStringBoxForeground(Graphics g, String text, Rectangle domain, Font font) {
 		// Save old font so it can be reset
 		Font oldFont = g.getFont();
 		g.setFont(font);
+		
+		Rectangle realDomain = domain.transform(Transform.createScaleTransform(FRIGGame.getScreenWidth(), FRIGGame.getScreenHeight()));
 		
 		String[] words = text.split(" ");
 		int lineNumber = 0;
 		int lineWidth = 0;
 		for(int i = 0; i < words.length; i++) {
 			String word = words[i] + " ";
-			if(lineWidth + font.getWidth(word) > box.getWidth()) {
+			if(lineWidth + font.getWidth(word) > realDomain.getWidth()) {
 				lineWidth = 0;
 				lineNumber++;
 			}
-			g.drawString(word, box.getX() + lineWidth, box.getY() + lineNumber * font.getHeight("X"));
+			g.drawString(word, realDomain.getX() + lineWidth, realDomain.getY() + lineNumber * font.getHeight("X"));
 			lineWidth += font.getWidth(word);
 		}
 		
@@ -169,8 +259,13 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 	}
 
 	// Getters and setters
-	public Rectangle getPresence() {
-		return new Rectangle(0,0,this.width,this.height);
+	private Rectangle domain = new Rectangle(0,0,0,0);
+	public Rectangle getDomain() {
+		this.domain.setX(0);
+		this.domain.setY(0);
+		this.domain.setWidth(this.width);
+		this.domain.setHeight(this.height);
+		return domain;
 	}
 	public Entity getCurrentCamera() {
 		if(this.currentCamera != null) {
@@ -196,46 +291,68 @@ public abstract class Scene extends IDable<String> implements GUICloseListener {
 	public void zoomCamera(float scale) {
 		getCurrentCamera().getComponent(CameraComponent.class).zoom(scale);
 	}
-	public Rectangle cameraTransform(Rectangle presence) {
+	public Rectangle cameraTransform(Rectangle domain) {
+		return domain.transform(this.getCurrentCamera().getComponent(CameraComponent.class).getTransform());
+		/*
 		return new Rectangle(
-				(presence.getX() - getCurrentCamera().getComponent(CameraComponent.class).getMinX()) * ((float) FRIGGame.getScreenWidth() / getCurrentCamera().getComponent(CameraComponent.class).getWidth()),
-				(presence.getY() - getCurrentCamera().getComponent(CameraComponent.class).getMinY()) * ((float) FRIGGame.getScreenHeight() / getCurrentCamera().getComponent(CameraComponent.class).getHeight()),
-				presence.getWidth() * ((float) FRIGGame.getScreenWidth() / getCurrentCamera().getComponent(CameraComponent.class).getWidth()),
-				presence.getHeight() * ((float) FRIGGame.getScreenHeight() / getCurrentCamera().getComponent(CameraComponent.class).getHeight()));
+				(domain.getX() - getCurrentCamera().getComponent(CameraComponent.class).getMinX()) * ((float) FRIGGame.getScreenWidth() / getCurrentCamera().getComponent(CameraComponent.class).getWidth()),
+				(domain.getY() - getCurrentCamera().getComponent(CameraComponent.class).getMinY()) * ((float) FRIGGame.getScreenHeight() / getCurrentCamera().getComponent(CameraComponent.class).getHeight()),
+				domain.getWidth() * ((float) FRIGGame.getScreenWidth() / getCurrentCamera().getComponent(CameraComponent.class).getWidth()),
+				domain.getHeight() * ((float) FRIGGame.getScreenHeight() / getCurrentCamera().getComponent(CameraComponent.class).getHeight()));
+				*/
 	}
 	public void openGUI(GUIFrame frame) {
 		guiStack.push(frame);
-		frame.addGUICloseListener(this);
+		this.subscribeTo(frame);
 	}
-
-	// Commands
-	protected void addEntityToScene(String entityId) {
+	public void closeGUI() {
+		guiStack.pop();
+	}
+	public void closeGUI(GUIFrame guiFrame) {
+		guiStack.remove(guiFrame);
+	}
+	public void closeGUIs(int numFrames) {
+		for (int i = 0; i < numFrames && !guiStack.isEmpty(); i++) {
+			guiStack.pop();
+		}
+	}
+	public void closeAllGUIs() {
+		while (!guiStack.isEmpty()) {
+			guiStack.pop();
+		}
+	}
+	public void addEntity(String entityId) {
+		if(Entity.getEntity(entityId).getScene() != null) {
+			Entity.getEntity(entityId).getScene().removeEntity(entityId);
+		}
 		Entity.getEntity(entityId).setScene(this);
 	}
-	protected void removeEntityFromScene(String entityId) {
+	public void addEntity(Entity entity) {
+		if(entity.getScene() != null) {
+			entity.getScene().removeEntity(entity);
+		}
+		entity.setScene(this);
+	}
+	public void removeEntity(String entityId) {
 		Entity.getEntity(entityId).setScene(null);
 	}
-	
+	public void removeEntity(Entity entity) {
+		entity.setScene(null);
+	}
 	protected void setMusic(String soundId) {
 	}
 	protected void playSound(String soundId) {
 	}
-	private void closeDialog() {
-		guiStack.pop();
-	}
-	private void closeDialogs(String numDialogs) {
-		for (int i = 0; i < Integer.parseInt(numDialogs) && !guiStack.isEmpty(); i++)
-			guiStack.pop();
-	}
-	public void closeAllDialogs() {
-		while (!guiStack.isEmpty())
-			guiStack.pop();
-	}
+	
 
 	// Events
 	@Override
-	public void guiClosed(GUIFrame sender, MenuItem selection) {
-		if (sender == guiStack.peek()) {
+	public void subscribeTo(GUIFrame reporter) {
+		reporter.addGUICloseListener(this);
+	}
+	@Override
+	public void reportedGuiClosed(GUIFrame source) {
+		if (source == guiStack.peek()) {
 			guiStack.pop();
 		}
 	}

@@ -7,16 +7,15 @@ import java.util.Collection;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.util.xml.XMLElement;
 
+import frigengine.battle.*;
 import frigengine.core.component.*;
 import frigengine.core.exceptions.data.*;
-import frigengine.core.scene.*;
 
 public class TriggerComponent extends Component {
 	// Required components
 	@Override
 	public  Collection<Class<? extends Component>> requiredComponents() {
 		return new ArrayList<Class<? extends Component>>(Arrays.asList(
-				PositionComponent.class,
 				ColliderComponent.class
 			));
 	}
@@ -27,6 +26,18 @@ public class TriggerComponent extends Component {
 	// Constructors and initialization
 	public TriggerComponent() {
 		this.triggerActions = new ArrayList<AbstractTriggeredEvent>(5);
+	}
+	private TriggerComponent(TriggerComponent other) {
+		super(other);
+		
+		this.triggerActions = new ArrayList<AbstractTriggeredEvent>();
+		for(AbstractTriggeredEvent a : other.triggerActions) {
+			this.triggerActions.add(a);
+		}
+	}
+	@Override
+	public TriggerComponent clone() {
+		return new TriggerComponent(this);
 	}
 	@Override
 	public void init(XMLElement xmlElement) {
@@ -42,6 +53,8 @@ public class TriggerComponent extends Component {
 			AbstractTriggeredEvent newTriggerAction; // go through all possible trigger actions
 			if (child.getName().equals(ChangeAreaEvent.class.getSimpleName())) {
 				newTriggerAction = new ChangeAreaEvent();
+			} else if (child.getName().equals(BattleStartEvent.class.getSimpleName())) {
+				newTriggerAction = new BattleStartEvent();
 			} else {
 				throw new InvalidTagException("valid trigger action",
 						child.getName());
@@ -56,11 +69,17 @@ public class TriggerComponent extends Component {
 	@Override
 	public void update(int delta, Input input) {
 		for(Entity e : getLocalEntities(PlayerControllerComponent.class)) {
-			if(e.getComponent(ColliderComponent.class).getCollisions().contains(this.getParent())) {
+			if(e.getComponent(ColliderComponent.class).getCollisions().contains(this.getContainingEntity())) {
 				for(AbstractTriggeredEvent a : this.triggerActions) {
 					a.execute(e);
 				}
 			}
 		}
+	}
+	
+	// Utilities
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + ": " + this.triggerActions.toArray();
 	}
 }

@@ -1,40 +1,45 @@
 package frigengine.core.gui;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.UnicodeFont;
-import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Transform;
 
 import frigengine.core.*;
+import frigengine.core.geom.*;
 import frigengine.core.scene.*;
 
-
-public abstract class GUIFrame implements GUICloseListener {
+public abstract class GUIFrame implements GUIContext {
 	// Constants
-	private static final int DEFAULT_MARGIN_HORIZONTAL = 50;
-	private static final int DEFAULT_MARGIN_VERTICAL = 30;
+	private static final float DEFAULT_MARGIN_HORIZONTAL = 0.01f;
+	private static final float DEFAULT_MARGIN_VERTICAL = 0.03f;
 	
 	// Attributes
 	protected UnicodeFont font;
 	protected Animation background;
-	protected Rectangle presence;
-	protected int horizontalMargin;
-	protected int verticalMargin;
+	protected Rectangle domain;
+	protected float horizontalMargin;
+	protected float verticalMargin;
 	protected boolean blocksTime;
 	protected boolean blocksInput;
+	protected boolean visible;
 
 	// Constructors and initialization
-	public GUIFrame(Rectangle presence) {
+	public GUIFrame(Rectangle domain) {
 		// font
 		this.font = FRIGGame.getDefaultFont();
 		
 		// background
-		this.background = FRIGGame.getGuiAsset(this.getClass().getSimpleName());
+		this.background = FRIGGame.getGuiAsset(this.getClass().getSimpleName()) == null ? Animation.getPlaceholder() : FRIGGame.getGuiAsset(this.getClass().getSimpleName());
 		
-		// presence
-		this.presence = presence;
+		// domain
+		this.domain = domain;
 		
 		// horizontalMargin
 		this.horizontalMargin = DEFAULT_MARGIN_HORIZONTAL;
@@ -48,60 +53,63 @@ public abstract class GUIFrame implements GUICloseListener {
 		// blocksInput
 		this.blocksInput = false;
 		
-		// guiCloseEventListeners
-		this.guiCloseEventListeners = null;
-	}
-	public GUIFrame(GUIFrame source) {
-		// font
-		this.font = source.font;
-		
-		// background
-		this.background = source.background;
-		
-		// presence
-		this.presence = source.getPresence();
-		
-		// borderHorizontal
-		this.horizontalMargin = source.horizontalMargin;
-		
-		// borderVertical
-		this.verticalMargin = source.verticalMargin;
-		
-		// blocksTime
-		this.blocksTime = source.blocksTime;
-		
-		// blocksInput
-		this.blocksInput = source.blocksInput;
+		// visible
+		this.visible = true;
 		
 		// guiCloseEventListeners
-		this.guiCloseEventListeners = source.guiCloseEventListeners;
+		this.guiCloseSubscribers = new ArrayList<GUICloseSubscriber>();
 	}
-	/*
-	public static GUIFrame from(GUIFrame template) {
-		if(template instanceof AbstractDialog)
-			return new AbstractDialog((AbstractDialog) template);
-		else
-			return null;
-	}
-	*/
 	
 	// Main loop methods
 	public abstract void update(int delta, Input input);
-	public abstract void render(Graphics g, Scene scene);
-
+	public abstract void render(Graphics g, GUIContext context);
+	// GUIContext
+	protected GUIContext context;
+	@Override
+	public void drawShape(Graphics g, Shape shape) {
+		Shape realShape = shape.transform(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()).concatenate(
+										  Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight())));
+		this.context.drawShape(g, realShape);
+	}
+	@Override
+	public void fillShape(Graphics g, Shape shape) {
+		Shape realShape = shape.transform(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()).concatenate(
+				  Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight())));
+		this.context.fillShape(g, realShape);
+	}
+	@Override
+	public void renderObjectForeground(Graphics g, Image image, Rectangle domain) {
+		Rectangle realDomain = domain.transform(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()).concatenate(
+				  								Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight())));
+		this.context.renderObjectForeground(g, image, realDomain.transform(Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight()).concatenate(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()))));
+	}
+	@Override
+	public void renderObjectForeground(Graphics g, Animation animation, Rectangle domain) {
+		Rectangle realDomain = domain.transform(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()).concatenate(
+					Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight())));
+		this.context.renderObjectForeground(g, animation, realDomain.transform(Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight()).concatenate(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()))));
+	}
+	@Override
+	public void renderStringBoxForeground(Graphics g, String text, Rectangle domain, Font font) {
+		Rectangle realDomain = domain.transform(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()).concatenate(
+					Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight())));
+		this.context.renderStringBoxForeground(g, text, realDomain.transform(Transform.createScaleTransform(this.getBorderedDomain().getWidth(), this.getBorderedDomain().getHeight()).concatenate(Transform.createTranslateTransform(this.getBorderedDomain().getX(), this.getBorderedDomain().getY()))), font);
+	}
+	
 	// Getters and setters
-	public Rectangle getPresence() {
-		return this.presence;
+	public Rectangle getDomain() {
+		return this.domain;
 	}
-	public Rectangle getBorderedPresence() {
-		return new Rectangle(presence.getX() + horizontalMargin, presence.getY() + verticalMargin,
-				presence.getWidth() - horizontalMargin * 2, presence.getHeight() - verticalMargin * 2);
+	private Rectangle borderedDomain = new Rectangle(0,0,0,0);
+	public Rectangle getBorderedDomain() {
+		this.borderedDomain.setX(this.domain.getX() + this.horizontalMargin);
+		this.borderedDomain.setY(this.domain.getY() + this.verticalMargin);
+		this.borderedDomain.setWidth(this.domain.getWidth() - this.horizontalMargin * 2);
+		this.borderedDomain.setHeight(this.domain.getHeight() - this.verticalMargin * 2);
+		return this.borderedDomain;
 	}
-	public Rectangle getRelativeBorderedPresence() {
-		return new Rectangle(this.horizontalMargin,this.verticalMargin,this.getBorderedPresence().getWidth(), getBorderedPresence().getHeight());
-	}
-	public void setPresence(Rectangle presence) {
-		this.presence = presence;
+	public void setDomain(Rectangle domain) {
+		this.domain = domain;
 	}
 	public boolean getBlocksTime() {
 		return this.blocksTime;
@@ -109,23 +117,24 @@ public abstract class GUIFrame implements GUICloseListener {
 	public boolean getBlocksInput() {
 		return this.blocksInput;
 	}
+	public boolean isVisible() {
+		return this.visible;
+	}
+	public void hide() {
+		this.visible = false;
+	}
+	public void show() {
+		this.visible = true;
+	}
 	
 	// Events
-	private ArrayList<GUICloseListener> guiCloseEventListeners;
-	public final void notifyClose() {
-		for (GUICloseListener listener : guiCloseEventListeners) {
-			listener.guiClosed(this, null);
+	protected List<GUICloseSubscriber> guiCloseSubscribers;
+	protected void reportCancel() {
+		for (GUICloseSubscriber listener : guiCloseSubscribers) {
+			listener.reportedGuiClosed(this);
 		}
 	}
-	public final void notifySelect(MenuItem menuItem) {
-		for (GUICloseListener listener : guiCloseEventListeners) {
-			listener.guiClosed(this, menuItem);
-		}
-	}
-	public final void addGUICloseListener(GUICloseListener listener) {
-		if (guiCloseEventListeners == null) {
-			guiCloseEventListeners = new ArrayList<GUICloseListener>();
-		}
-		guiCloseEventListeners.add(listener);
+	public final void addGUICloseListener(GUICloseSubscriber listener) {
+		guiCloseSubscribers.add(listener);
 	}
 }

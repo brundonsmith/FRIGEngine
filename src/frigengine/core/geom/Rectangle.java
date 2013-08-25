@@ -1,5 +1,7 @@
 package frigengine.core.geom;
 
+import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
@@ -11,6 +13,9 @@ public class Rectangle extends org.newdawn.slick.geom.Rectangle implements Initi
 	// Constructors and initialization
 	public Rectangle() {
 		super(0, 0, 1, 1);
+	}
+	public Rectangle(org.newdawn.slick.geom.Rectangle rectangle) {
+		super(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
 	}
 	public Rectangle(float x, float y, float width, float height) {
 		super(x, y, width, height);
@@ -54,24 +59,43 @@ public class Rectangle extends org.newdawn.slick.geom.Rectangle implements Initi
 					xmlElement.getAttribute("height"));
 		}
 	}
-
+	
 	// Getters and setters
+	private org.newdawn.slick.geom.Rectangle boundingRectangle = new org.newdawn.slick.geom.Rectangle(0,0,0,0);
 	@Override
 	public org.newdawn.slick.geom.Rectangle getBoundingRectangle() {
-		return new org.newdawn.slick.geom.Rectangle(
-				this.getMinX(),
-				this.getMinY(),
-				this.getWidth(),
-				this.getHeight()
-				);
+		boundingRectangle.setX(this.getMinX());
+		boundingRectangle.setY(this.getMinY());
+		boundingRectangle.setWidth(this.getWidth());
+		boundingRectangle.setHeight(this.getHeight());
+		return boundingRectangle;
 	}
+	private org.newdawn.slick.geom.Ellipse boundingEllipse = new org.newdawn.slick.geom.Ellipse(0,0,0,0);
 	@Override
 	public org.newdawn.slick.geom.Ellipse getBoundingEllipse() {
-		return new org.newdawn.slick.geom.Ellipse(
-				this.getCenterX(),
-				this.getCenterY(),
-				this.getWidth() / 2,
-				this.getHeight() / 2
+		boundingEllipse.setCenterX(this.getCenterX());
+		boundingEllipse.setCenterY(this.getCenterY());
+		boundingEllipse.setRadius1(this.getWidth() / 2);
+		boundingEllipse.setRadius2(this.getHeight() / 2);
+		return boundingEllipse;
+	}
+
+	// Operations
+	@Override
+	public Rectangle transform(Transform transform) {
+		Shape tranformed = super.transform(transform);
+
+		return new Rectangle(
+				tranformed.getMinX(),
+				tranformed.getMinY(),
+				tranformed.getWidth(),
+				tranformed.getHeight()
 				);
+	}
+	
+	// Utilities
+	@Override
+	public String toString() {
+		return "Rectangle: x=" + this.getX() + " y=" + this.getY() + " " + this.getWidth() + "x" + this.getHeight(); 
 	}
 }

@@ -20,17 +20,15 @@ import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 import org.newdawn.slick.util.xml.XMLParser;
 
-import frigengine.battle.Battle;
-import frigengine.battle.BattleTemplate;
+import frigengine.battle.*;
 import frigengine.core.component.*;
 import frigengine.core.exceptions.data.*;
+import frigengine.core.gui.GUIFrame;
 import frigengine.core.idable.*;
 import frigengine.core.scene.*;
-import frigengine.field.Area;
-import frigengine.field.AreaChangeRequestListener;
+import frigengine.field.*;
 
-
-public class FRIGGame implements Game, AreaChangeRequestListener {
+public class FRIGGame implements Game {
 	// Singleton
 	private static FRIGGame instance;
 	
@@ -143,7 +141,7 @@ public class FRIGGame implements Game, AreaChangeRequestListener {
 	public boolean closeRequested() {
 		return true;
 	}
-
+	
 	// Main loop methods
 	@Override
 	public void update(GameContainer container, int delta) {
@@ -154,7 +152,12 @@ public class FRIGGame implements Game, AreaChangeRequestListener {
 		if (currentBattle != null) {				// If in battle
 			this.currentBattle.update(delta, container.getInput());
 		} else {										// If in field
-			this.areas.getSelected().update(delta, container.getInput());
+			this.areas.getSelection().update(delta, container.getInput());
+		}
+		
+		// TEMPORARY ///////////////////////////////////////////////////////////////////////
+		if(container.getInput().isKeyPressed(Keyboard.KEY_RCONTROL)) {
+			this.currentBattle = null;
 		}
 	}
 	@Override
@@ -162,7 +165,7 @@ public class FRIGGame implements Game, AreaChangeRequestListener {
 		if (this.currentBattle != null) {		// If in battle
 			this.currentBattle.render(g);
 		} else {										// If in field
-			this.areas.getSelected().render(g);
+			this.areas.getSelection().render(g);
 		}
 	}
 
@@ -171,62 +174,65 @@ public class FRIGGame implements Game, AreaChangeRequestListener {
 	public String getTitle() {
 		return this.title;
 	}
-	public static UnicodeFont getDefaultFont() {
-		return instance.defaultFont;
-	}
-	private void setCurrentArea(String areaId) {
-		if(this.areas.hasSelection() && !this.areas.getSelectionId().equals(areaId)) {
-			this.areas.getSelected().closeAllDialogs();
-		}
-		this.areas.select(areaId);
-	}
-	public static void changeArea(String areaID) {
-		FRIGGame.instance.setCurrentArea(areaID);
-	}
-	public static Animation getGuiAsset(String id) {
-		return instance.guiAssets.get(id).copy();
-	}
 	
-	// Exposed GameContainer attributes
+	// Global
+	public static String getGameTitle() {
+		return FRIGGame.instance.getTitle();
+	}
 	public static int getScreenWidth() {
 		return instance.container.getWidth();
 	}
 	public static int getScreenHeight() {
 		return instance.container.getHeight();
 	}
-	
-	// Commands
-	/*
-	public void executeCommand(CommandInstance command) {
-		if (command.getCommandType() == CommandType.GAME_COMMAND) {
-			switch (command.getCommand()) {
-			case EXECUTE_SCRIPT:
-				executeScript(
-						command.getArgument(0),
-						command.getArguments().length == 1 ? null : Arrays.copyOfRange(
-								command.getArguments(), 1, command.getArguments().length));
-				break;
-			case CHANGE_AREA:
-				this.changeArea(command.getArgument(0));
-				break;
-			case START_BATTLE:
-				this.startBattle(command.getArgument(0));
-				break;
-			default:
-				break;
-			}
-		} else if (command.getCommandType() == CommandType.AREA_COMMAND) {
-			this.areas.get(command.getArguments()[0]).executeCommand(command);
-		} else if (command.getCommandType() == CommandType.ENTITY_COMMAND) {
-			this.entities.get(command.getArguments()[0]).executeCommand(command);
+	public static UnicodeFont getDefaultFont() {
+		return instance.defaultFont;
+	}
+	public static Scene getCurrentScene() {
+		if(FRIGGame.instance.currentBattle != null) {
+			return FRIGGame.instance.currentBattle;
+		} else {
+			return FRIGGame.instance.areas.getSelection();
 		}
 	}
-	public void executeScript(String scriptID, String[] args) {
-		runningScripts.execute(scripts.get(scriptID).getInstance(args));
+	public static void changeArea(String areaId) {
+		Scene oldScene = FRIGGame.instance.areas.getSelection();
+		FRIGGame.instance.areas.select(areaId);
+		Scene newScene = FRIGGame.instance.areas.getSelection();
+		
+		oldScene.onLoseFocus(newScene);
+		newScene.onGainFocus(oldScene);
 	}
-	private void startBattle(String battleTemplate) {
+	public static void startBattle(String battleTemplateId) {
+		BattleTemplate battleTemplate = FRIGGame.instance.battleTemplates.get(battleTemplateId);
+
+		FRIGGame.instance.currentBattle = new Battle();
+		FRIGGame.instance.currentBattle.init(battleTemplate);
+		
+		Scene oldScene = FRIGGame.instance.areas.getSelection();
+		Scene newScene =FRIGGame.instance.currentBattle;
+		
+		oldScene.onLoseFocus(newScene);
+		newScene.onGainFocus(oldScene);
 	}
-*/
+	public static void endBattle() {
+		Scene oldScene = FRIGGame.instance.currentBattle;
+		FRIGGame.instance.currentBattle = null;
+		Scene newScene = FRIGGame.instance.areas.getSelection();
+		
+		oldScene.onLoseFocus(newScene);
+		newScene.onGainFocus(oldScene);
+	}
+	public static Animation getGuiAsset(String id) {
+		return !FRIGGame.instance.guiAssets.contains(id) ? Animation.getPlaceholder() : FRIGGame.instance.guiAssets.get(id).copy();
+	}
+	public static void openGUI(GUIFrame guiFrame) {
+		FRIGGame.instance.getCurrentScene().openGUI(guiFrame);
+	}
+	public static void closeGUI(GUIFrame guiFrame) {
+		FRIGGame.instance.getCurrentScene().closeGUI(guiFrame);
+	}
+	
 	
 	// Utilities
 	public static String idFromAbsolutePath(String path) {
@@ -260,11 +266,5 @@ public class FRIGGame implements Game, AreaChangeRequestListener {
 				return name.endsWith(".xml");
 			}
 		};
-	}
-	
- 	// Events
- 	@Override
-	public void areaChangeRequested(Area source, String newAreaId) {
- 		this.changeArea(newAreaId);
 	}
 }

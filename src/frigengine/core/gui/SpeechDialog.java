@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import org.lwjgl.input.Keyboard;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
-import org.newdawn.slick.geom.Rectangle;
 
 import frigengine.core.*;
-import frigengine.core.scene.*;
+import frigengine.core.geom.*;
+import frigengine.core.gui.menu.*;
 
 public class SpeechDialog extends AbstractSpeechDialog {
 	// Attributes
@@ -43,8 +43,8 @@ public class SpeechDialog extends AbstractSpeechDialog {
 	public SpeechDialog(ArrayList<String> pages) {
 		super(null, pages);
 
-		// presence
-		this.presence = new Rectangle(
+		// domain
+		this.domain = new Rectangle(
 				0,
 				FRIGGame.getScreenHeight() * 5/ 6,
 				FRIGGame.getScreenWidth(),
@@ -75,9 +75,11 @@ public class SpeechDialog extends AbstractSpeechDialog {
 		}
 	}
 	@Override
-	public void render(Graphics g, Scene scene) {
-		scene.renderObjectForeground(g, this.background, this.getPresence());
-		scene.renderStringBoxForeground(g, this.getCurrentPage(), this.getBorderedPresence(), this.font);
+	public void render(Graphics g, GUIContext context) {
+		this.context = context;
+		
+		this.context.renderObjectForeground(g, this.background, this.getDomain());
+		this.context.renderStringBoxForeground(g, this.getCurrentPage(), this.getBorderedDomain(), this.font);
 	}
 	
 	// Events

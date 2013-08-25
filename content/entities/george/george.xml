@@ -39,8 +39,9 @@
 		<animation_move_e id="walk_e"/>
 		<animation_move_w id="walk_w"/>
 	</CharacterComponent>
-	<ColliderComponent collidable="true" movable="true">
+	<ColliderComponent collisiongroups="ground" movable="true">
 		<Ellipse x="0" y="10" radiusX="10" radiusY="5"/>
 	</ColliderComponent>
 	<MovementComponent></MovementComponent>
+	<BattleComponent health="100" attack="5" defense="3" magicdefense="1" resilience="2" speed="4"></BattleComponent>
 </Entity>

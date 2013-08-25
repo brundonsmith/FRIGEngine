@@ -11,14 +11,13 @@ import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.util.xml.SlickXMLException;
 import org.newdawn.slick.util.xml.XMLElement;
 
-import frigengine.core.*;
 import frigengine.core.exceptions.data.*;
 import frigengine.core.geom.*;
 import frigengine.core.idable.*;
-import frigengine.core.util.Initializable;
+import frigengine.core.util.*;
 
 
-public class Animation extends IDable<String> implements Initializable {
+public class Animation extends IDable<String> implements Initializable, Cloneable {
 	// Constants
 	public static final String PLACEHOLDER_ID = "PLACEHOLDER";
 
@@ -27,17 +26,31 @@ public class Animation extends IDable<String> implements Initializable {
 	
 	private int defaultDuration;
 	private org.newdawn.slick.Animation animation;
-	private Rectangle presence;
-	private List<AnimationFinishedListener> finishedListeners;
+	private Rectangle domain;
 
 	// Constructors and initialization
 	public Animation() {
 		this.setId("animation" + Integer.toString(Animation.animationCount++, 4));
-		this.animation = null;
 		this.defaultDuration = 1000;
-		this.presence = new Rectangle(0, 0, 0, 0);
-		this.finishedListeners = new ArrayList<AnimationFinishedListener>();
+		this.animation = null;
+		this.domain = new Rectangle(0, 0, 0, 0);
+		this.finishedSubscribers = new ArrayList<AnimationFinishedSubscriber>();
 	}
+	private Animation(Animation other) {
+		this.setId(other.getId());
+		this.defaultDuration = other.defaultDuration;
+		this.animation = other.animation.copy();
+		this.domain = new Rectangle(other.domain.getX(), other.domain.getY(), other.domain.getWidth(), other.domain.getHeight());
+		this.finishedSubscribers = new ArrayList<AnimationFinishedSubscriber>();
+		for(AnimationFinishedSubscriber a : other.finishedSubscribers) {
+			this.finishedSubscribers.add(a);
+		}
+	}
+	@Override
+	public Animation clone() {
+		return new Animation(this);
+	}
+	
 	public void init(XMLElement xmlElement) {
 		// Check element name
 		if (!xmlElement.getName().equals(this.getClass().getSimpleName())) {
@@ -87,27 +100,27 @@ public class Animation extends IDable<String> implements Initializable {
 					xmlElement.getAttribute("looping"));
 		}
 
-		// presence
+		// domain
 		try {
-			this.presence.setX((float) xmlElement.getDoubleAttribute("offset_x", this.presence.getX()));
+			this.domain.setX((float) xmlElement.getDoubleAttribute("offset_x", this.domain.getX()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "offset_x",
 					xmlElement.getAttribute("offset_x"));
 		}
 		try {
-			this.presence.setY((float) xmlElement.getDoubleAttribute("offset_y", this.presence.getY()));
+			this.domain.setY((float) xmlElement.getDoubleAttribute("offset_y", this.domain.getY()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "offset_y",
 					xmlElement.getAttribute("offset_y"));
 		}
 		try {
-			this.presence.setWidth((float) xmlElement.getDoubleAttribute("width", this.animation.getWidth()));
+			this.domain.setWidth((float) xmlElement.getDoubleAttribute("width", this.animation.getWidth()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "width",
 					xmlElement.getAttribute("width"));
 		}
 		try {
-			this.presence.setHeight((float) xmlElement.getDoubleAttribute("height", this.animation.getHeight()));
+			this.domain.setHeight((float) xmlElement.getDoubleAttribute("height", this.animation.getHeight()));
 		} catch (SlickXMLException e) {
 			throw new AttributeFormatException(xmlElement.getName(), "height",
 					xmlElement.getAttribute("height"));
@@ -117,8 +130,8 @@ public class Animation extends IDable<String> implements Initializable {
 	}
 
 	// Getters and setters
-	public Rectangle getPresence() {
-		return presence;
+	public Rectangle getDomain() {
+		return domain;
 	}
 
 	// Exposed Animation methods
@@ -129,10 +142,7 @@ public class Animation extends IDable<String> implements Initializable {
 		this.animation.addFrame(duration, x, y);
 	}
 	public Animation copy() {
-		Animation copy = new Animation();
-		copy.animation = this.animation.copy();
-		copy.presence = this.presence;
-		return copy;
+		return this.clone();
 	}
 	public void draw() {
 		this.animation.draw();
@@ -236,7 +246,7 @@ public class Animation extends IDable<String> implements Initializable {
 	public void update(long delta) {
 		this.animation.update(delta);
 		if(this.isStopped()) {
-			this.notifyFinishedListeners();
+			this.reportFinished();
 		}
 	}
 	@SuppressWarnings("deprecation")
@@ -245,33 +255,39 @@ public class Animation extends IDable<String> implements Initializable {
 	}
 
 	// Utilities
+	private static Animation placeholder;
 	public static Animation getPlaceholder() {
-		Animation placeholder = new Animation();
-		placeholder.setId(Animation.PLACEHOLDER_ID);
-		ImageBuffer buf = new ImageBuffer(100,100);
-		for(int x = 0; x < buf.getWidth(); x++) {
-			for(int y = 0; y < buf.getHeight(); y++) {
-				buf.setRGBA(x, y, 255, 0, 255, 255);
+		if(placeholder == null) {
+			placeholder = new Animation();
+			placeholder.setId(Animation.PLACEHOLDER_ID);
+			ImageBuffer buf = new ImageBuffer(100,100);
+			for(int x = 0; x < buf.getWidth(); x++) {
+				for(int y = 0; y < buf.getHeight(); y++) {
+					buf.setRGBA(x, y, 255, 0, 255, 255);
+				}
 			}
+			Image image = new Image(buf);
+			
+			placeholder.animation = new org.newdawn.slick.Animation(new Image[] { image }, 1);
+			placeholder.domain = new Rectangle(0, 0, image.getWidth(), image.getHeight());
 		}
-		Image image = new Image(buf);
-		
-		placeholder.animation = new org.newdawn.slick.Animation(new Image[] { image }, 1);
-		placeholder.presence = new Rectangle(0, 0, image.getWidth(), image.getHeight());
-		return placeholder;
+		return placeholder.clone();
 	}
 
 	// Events
-	public void addFinishedListener(AnimationFinishedListener listener) {
-		this.finishedListeners.add(listener);
+	private List<AnimationFinishedSubscriber> finishedSubscribers;
+	public void addFinishedSubscriber(AnimationFinishedSubscriber subscriber) {
+		this.finishedSubscribers.add(subscriber);
 	}
-	private void notifyFinishedListeners() {
+	private void reportFinished() {
+		// Reset duration to default
 		for(int i = 0; i < this.animation.getFrameCount(); i++) {
 			this.animation.setDuration(i, this.defaultDuration / this.animation.getFrameCount());
 		}
 		
-		for(AnimationFinishedListener listener : finishedListeners) {
-			listener.animationFinished(this);
+		// Notify listeners
+		for(AnimationFinishedSubscriber subscriber : finishedSubscribers) {
+			subscriber.reportedAnimationFinished(this);
 		}
 	}
 }

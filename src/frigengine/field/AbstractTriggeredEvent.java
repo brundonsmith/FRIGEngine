@@ -1,6 +1,5 @@
 package frigengine.field;
 
-import frigengine.core.*;
 import frigengine.core.component.*;
 import frigengine.core.util.Initializable;
 

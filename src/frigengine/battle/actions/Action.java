@@ -1,11 +1,13 @@
 package frigengine.battle.actions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import frigengine.battle.*;
 
 import frigengine.core.component.*;
 import frigengine.core.idable.*;
+import frigengine.core.scene.*;
 
 public abstract class Action extends IDable<String> {
 	// Constants
@@ -70,4 +72,29 @@ public abstract class Action extends IDable<String> {
 
 	// Application
 	public abstract void apply(Entity source, List<Entity> targets);
+	public List<Movement> getMovements(Entity source, List<Entity> targets) {
+		List<Movement> movements = new ArrayList<Movement>();
+		
+		for(Entity e : targets) {
+			// attack
+			movements.add(new Movement(
+					100, 
+					Movement.getLinearPath(
+							e.getComponent(PositionComponent.class).getPositionVector().sub(source.getComponent(PositionComponent.class).getPositionVector())
+							),
+					this.getId()
+				));
+			
+			// return
+			movements.add(new Movement(
+					100, 
+					Movement.getLinearPath(
+							source.getComponent(PositionComponent.class).getPositionVector().sub(e.getComponent(PositionComponent.class).getPositionVector())
+							),
+					"walk_e"
+				));
+		}
+		
+		return movements;
+	}
 }

@@ -1,6 +1,6 @@
 package frigengine.core.gui;
 
-import org.newdawn.slick.geom.Rectangle;
+import frigengine.core.geom.*;
 
 public abstract class AbstractMeter extends GUIFrame {
 	// Attributes
@@ -8,9 +8,9 @@ public abstract class AbstractMeter extends GUIFrame {
 	protected int capacity;
 	
 	// Constructors and initialization
-	public AbstractMeter(Rectangle presence, int capacity) {
-		super(presence);
-		
+	public AbstractMeter(Rectangle domain, int capacity) {
+		super(domain);
+		// TODO Change all rectangles to slick?
 		// value
 		this.value = 0;
 		
@@ -26,7 +26,7 @@ public abstract class AbstractMeter extends GUIFrame {
 		this.value = Math.max(Math.min(value, this.capacity), 0);
 	}
 	public float getPercentage() {
-		return (float)this.value / (float)this.capacity;
+		return Math.min((float)this.value / (float)this.capacity, 1.0f);
 	}
 	public int getCapacity() {
 		return this.capacity;

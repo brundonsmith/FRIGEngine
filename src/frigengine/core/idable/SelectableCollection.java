@@ -1,6 +1,5 @@
 package frigengine.core.idable;
 
-@SuppressWarnings("serial")
 public class SelectableCollection<K, V extends IDable<K>> extends IDableCollection<K,V> {
 	// Attributes
 	private K selectionId;
@@ -17,7 +16,7 @@ public class SelectableCollection<K, V extends IDable<K>> extends IDableCollecti
 	public K getSelectionId() {
 		return this.selectionId;
 	}
-	public V getSelected() {
+	public V getSelection() {
 		return this.get(this.selectionId);
 	}
 	public boolean hasSelection() {

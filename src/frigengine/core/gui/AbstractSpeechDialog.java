@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 
-import org.newdawn.slick.geom.Rectangle;
-
+import frigengine.core.geom.*;
 import frigengine.core.scene.*;
 
 public abstract class AbstractSpeechDialog extends GUIFrame {
@@ -14,24 +13,17 @@ public abstract class AbstractSpeechDialog extends GUIFrame {
 	protected Queue<String> pages;
 
 	// Constructors and initialization
-	public AbstractSpeechDialog(Rectangle presence, String content) {
-		super(presence);
+	public AbstractSpeechDialog(Rectangle domain, String content) {
+		super(domain);
 		
 		// pages
 		this.setContent(content);
 	}
-	public AbstractSpeechDialog(Rectangle presence, List<String> pages) {
-		super(presence);
+	public AbstractSpeechDialog(Rectangle domain, List<String> pages) {
+		super(domain);
 		
 		// pages
 		this.setPages(pages);
-	}
-	public AbstractSpeechDialog(AbstractSpeechDialog source) {
-		super(source);
-		
-		this.pages = new LinkedList<String>();
-		for(String page : source.pages)
-			this.pages.add(page);
 	}
 	
 	// Getters and setters
@@ -45,7 +37,7 @@ public abstract class AbstractSpeechDialog extends GUIFrame {
 		StringBuilder page = new StringBuilder();
 		while(contentScanner.hasNext()) {
 			String word = contentScanner.next();
-			if(Scene.stringFitsBox(page.toString(), this.presence, this.font)) {
+			if(Scene.stringFitsBox(page.toString(), this.domain, this.font)) {
 				page.append(word + " ");
 			} else {
 				this.pages.add(page.toString());
@@ -65,7 +57,7 @@ public abstract class AbstractSpeechDialog extends GUIFrame {
 	public void iterate() {
 		this.pages.remove();
 		if(this.pages.size() == 0) {
-			this.notifyClose();
+			this.reportCancel();
 		}
 	}
 }

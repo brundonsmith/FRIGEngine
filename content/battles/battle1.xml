@@ -1,0 +1,9 @@
+<BattleTemplate>
+	<SceneLayer depth="0" priority="0">
+		<Animation id="background" sprite="content/battles/battlefield.png" rows="1" cols="1" />
+	</SceneLayer>
+	<enemies>
+		<Entity id="box">
+		</Entity>
+	</enemies>
+</BattleTemplate>
